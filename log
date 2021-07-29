@@ -1,0 +1,11 @@
+for i in {1..12}
+do
+echo barcodes.$i 
+python CW_sumstatsBP.py -o /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/mtscATAC/GMTF1/TenX/GMTF/outs/NewMethod/TestFolder -s barcodes.$i &
+done
+
+
+python  CW_variant_calling.py -o /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/mtscATAC/GMTF1/TenX/GMTF/outs/NewMethod/TestFolder
+
+
+git init
