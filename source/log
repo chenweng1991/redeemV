@@ -1,3 +1,4 @@
 cp /lab/solexa_weissman/cweng/PlayRoom/mitoProcessing_liz_raw/Example.liz_1.fastq ./Example.R1.fq.gz
 cp /lab/solexa_weissman/cweng/PlayRoom/mitoProcessing_liz_raw/Example.liz_2.fastq ./Example.i5.fq.gz
 cp /lab/solexa_weissman/cweng/PlayRoom/mitoProcessing_liz_raw/Example.liz_3.fastq ./Example.R2.fq.gz
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Donor01_CD34_1_Multiomekit/CellRanger/arc2_Donor01_CD34_1/outs/filtered_feature_bc_matrix/barcodes.tsv.gz ./
