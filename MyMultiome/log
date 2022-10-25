@@ -12,3 +12,6 @@ cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210706L1/test/Mul
 
 #2021-8-31 write a script to estimate the complexity by generate sequencing depth verses fragment per cell
 
+#2022-10-25
+cp /lab/solexa_weissman/cweng/Packages/cxw486/scATAClib/Bam2bw.sh ./
+

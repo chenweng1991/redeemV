@@ -1,0 +1,3 @@
+cp /lab/solexa_weissman/cweng/PlayRoom/mitoProcessing_liz_raw/Example.liz_1.fastq ./Example.R1.fq.gz
+cp /lab/solexa_weissman/cweng/PlayRoom/mitoProcessing_liz_raw/Example.liz_2.fastq ./Example.i5.fq.gz
+cp /lab/solexa_weissman/cweng/PlayRoom/mitoProcessing_liz_raw/Example.liz_3.fastq ./Example.R2.fq.gz
