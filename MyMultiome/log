@@ -1,0 +1,14 @@
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210522/210522_Multiome_HumanMouse_Miseq_fq/MakeBC.ATAC.I2.10X.py ./MakeBC.ATAC.I2.10X.MiNovaseq.py
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210506/210506_Multiome_ATAC_Nextseq_fq/MakeBC.ATAC.I2.py ./MakeBC.ATAC.I2.10X.Nextseq.py
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210522/210522_Multiome_HumanMouse_Miseq_fq/MergeBC2Bed.10X.py ./
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210522/210522_Multiome_HumanMouse_Miseq_fq/DeduplicateRawBed.10X.py ./
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210522/210522_Multiome_HumanMouse_Miseq_fq/Summarize.TagDedup.10X.py ./
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210506/210506_Multiome_ATAC_Nextseq_fq/Counts.sh ./
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210704/210704_Multiome_Donor01_BMMC_Mito_MiseqNano_fq
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210706L1/MyDemulti.py ./
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210706L1/test/MultiomeATAC.sh ./
+
+#2021-8-31 in the future, write code directly here, but have a note on which folder used for testing
+
+#2021-8-31 write a script to estimate the complexity by generate sequencing depth verses fragment per cell
+

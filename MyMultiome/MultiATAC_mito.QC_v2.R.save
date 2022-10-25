@@ -1,0 +1,70 @@
+#!/usr/bin/env Rscript
+.libPaths(c('/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal',.libPaths()))
+library(labeling)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(plyr)
+args = commandArgs(trailingOnly=TRUE)
+name=args[1]
+ReadsCounts=args[2]
+MitoSummary=args[3]
+Mitotsv=args[4]
+
+##Read files
+ReadsCounts<-read.table(ReadsCounts)
+Cell.Mito.Reads<-read.table(MitoSummary)
+tsvOnCell.mito<-read.table(Mitotsv)
+
+##Plot Reads processing summary
+data<-ReadsCounts
+data$V1<-factor(data$V1,levels=c("TotalReads","TotalMitoReads","UniqProperpairReads","MitoReadsPair"))
+/lab/solexa_weissman/cweng/Packages/MyMultiomedatatoplot<-data.frame(Name=c("Raw","TotalMito","Mapped","MappedMito","Read_mito_Cell","Frag_mito_Cell"),N=c(ReadsCounts$V2[1],ReadsCounts$V2[2],ReadsCounts$V2[3],ReadsCounts$V2[4],sum(Cell.Mito.Reads$V3),sum(Cell.Mito.Reads$V2)))
+
+datatoplot$Name<-factor(datatoplot$Name,levels=c("Raw","TotalMito","Mapped","MappedMito","Frag_mito_Cell"))
+ComplexityMito<-paste(100*round(sum(Cell.Mito.Reads$V2)/sum(Cell.Mito.Reads$V3),2),"%",sep="")
+tt<-paste("Reads processing:\nTotalmitoFraction: ",100*round(data$V2[2]/data$V2[1],2),"%\nPropermappedMitoFraction: ",100*round(data$V2[4]/data$V2[3],2),"%",sep="") %>% paste(.,"\nComplexity",ComplexityMito)
+p1<-subset(datatoplot,Name %in%c("Raw","TotalMito","Mapped","MappedMito","Frag_mito_Cell")) %>% ggplot(.)+aes(Name,N,fill=Name)+geom_bar(color="black",stat="identity")+ggtitle(tt)+theme_classic()+theme(axis.text=element_text(size=6,color="black"))
+
+## Examine Reads on Cell
+Cell.Mito.Reads.order<-Cell.Mito.Reads[order(Cell.Mito.Reads$V2,decreasing=T),]
+Cell.Mito.Reads.order$cumFragRatio<-cumsum(Cell.Mito.Reads.order$V2)/sum(Cell.Mito.Reads.order$V2)
+Cell.Mito.Reads.order$rk<-rank(-Cell.Mito.Reads.order$V2)
+
+p2<-ggplot(Cell.Mito.Reads.order[1:40000,])+aes(rk,cumFragRatio)+geom_point()+theme_bw()+geom_vline(xintercept=10000,linetype=2)+ylim(0,1)
+p3<-ggplot(Cell.Mito.Reads.order)+aes(log10(rk),log10(V2))+geom_point()+theme_bw()+geom_vline(xintercept=4,linetype=2)
+
+
+##Plot Mitofragments per cell
+Median.2000<-median(subset(Cell.Mito.Reads.order,rk<=2000)$V2)
+Median.5000<-median(subset(Cell.Mito.Reads.order,rk<=5000)$V2)
+Median.8000<-median(subset(Cell.Mito.Reads.order,rk<=8000)$V2)
+Median.10000<-median(subset(Cell.Mito.Reads.order,rk<=10000)$V2)
+Median.12000<-median(subset(Cell.Mito.Reads.order,rk<=12000)$V2)
+Titlep4<-paste("Median.2000=",Median.2000,"\nMedian.5000=",Median.5000,"\nMedian.8000=",Median.8000,"\nMedian.10000=",Median.10000,"\nMedian.12000=",Median.12000)
+p4<-ggplot()+geom_violin(data=subset(Cell.Mito.Reads.order,rk<=2000),aes("A.2000Cut",log10(V2)))+geom_boxplot(data=subset(Cell.Mito.Reads.order,rk<=2000),aes("A.2000Cut",log10(V2)),width=0.2)+geom_violin(data=subset(Cell.Mito.Reads.order,rk<=5000),aes("B.5000Cut",log10(V2)))+geom_boxplot(data=subset(Cell.Mito.Reads.order,rk<=5000),aes("B.5000Cut",log10(V2)),width=0.2)+geom_violin(data=subset(Cell.Mito.Reads.order,rk<=8000),aes("C.8000Cut",log10(V2)))+geom_boxplot(data=subset(Cell.Mito.Reads.order,rk<=8000),aes("C.8000Cut",log10(V2)),width=0.2)+geom_violin(data=subset(Cell.Mito.Reads.order,rk<=10000),aes("D.10000Cut",log10(V2)))+geom_boxplot(data=subset(Cell.Mito.Reads.order,rk<=10000),aes("D.10000Cut",log10(V2)),width=0.2)+geom_violin(data=subset(Cell.Mito.Reads.order,rk<=12000),aes("E.12000Cut",log10(V2)))+geom_boxplot(data=subset(Cell.Mito.Reads.order,rk<=12000),aes("E.12000Cut",log10(V2)),width=0.2)+theme_bw()+ggtitle(Titlep4)
+
+
+##plot fragment size distribution
+tsvOnCell.mito$size<-tsvOnCell.mito$V3-tsvOnCell.mito$V2
+p5<-ggplot(tsvOnCell.mito)+aes(size)+geom_density()+theme_classic()+ggtitle("Mito.insert.distribution")
+
+
+##complexities
+tsvOnCell.mito.onCell<-subset(tsvOnCell.mito,V1=="chrM" & V4 %in% subset(Cell.Mito.Reads.order,rk<=10000)$V1)
+Data4Pie.mito<-as.data.frame(table(tsvOnCell.mito.onCell$V5))
+if(nrow(Data4Pie.mito)>=8){
+  Data4Pie.mito<-rbind(Data4Pie.mito[1:8,],data.frame(Var1=">=8",Freq=sum(Data4Pie.mito[9:nrow(Data4Pie.mito),2])))
+}
+ttPie.mito<-paste(paste("1-copy:",round((Data4Pie.mito$Freq/sum(Data4Pie.mito$Freq))[1],2)),"\n",
+paste("2-copy:",round((Data4Pie.mito$Freq/sum(Data4Pie.mito$Freq))[2],2)),"\n",
+paste("3-copy:",round((Data4Pie.mito$Freq/sum(Data4Pie.mito$Freq))[3],2)))
+
+p6<-ggplot(Data4Pie.mito)+aes("",Freq,fill=Var1)+geom_bar(stat="identity",width=1)+coord_polar("y", start=0)+scale_fill_brewer(palette="Set1")+theme_classic()+ggtitle(paste("ComplexityMito\n",ttPie.mito))
+
+
+
+##Print out the plots
+png(paste(name,"QCplot.png",sep="."),width=3000,height=4000,res=300)
+grid.arrange(p1,p2,p3,p4,p5,p6)
+dev.off()

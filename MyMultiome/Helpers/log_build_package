@@ -1,0 +1,43 @@
+library(devtools)
+library(roxygen2)
+library(pkgdown)
+
+# creates the package folder
+create("EZsinglecell2")
+
+# Get inside the folder
+setwd("./EZsinglecell2/")
+
+# created README.md for Github landing page
+usethis::use_readme_md(open = FALSE)
+
+# creates news file
+usethis::use_news_md(open = FALSE)
+
+# create a vignette
+usethis::use_vignette("package_intro")
+
+#----------------------------------------------- Add functions into the R folder
+
+
+#----------------------------------------------- Build the package and website
+devtools::document()
+devtools::check()    ## It's ok if the dependent packages are not available this in folder
+devtools::build_manual(pkg = ".", path = ".")
+pkgdown::build_site()
+
+#----------------------------------------------- initiate git and push
+git init
+git add --all
+git commit -m "initial commit"
+# Create a repository called EZsinglecell2 on github
+git remote add origin https://github.com/chenweng1991/EZsinglecell2.git
+git push origin master
+## Type in personal token: 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
+
+
+
+#----------------------------------------------- Rountine Git hub
+git add .
+git commit
+git push origin master
