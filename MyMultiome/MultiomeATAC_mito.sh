@@ -1,21 +1,22 @@
 #!/bin/bash
 ## Note:  this version is for miseq or novaseq,  nextseq is slightly different
+
+echo "7 inputs: $1:Prefix, $2:Read1.fq, $3:Read2.fq, $4:i5.fq, $5:0; $6:threads, $7:MyMultiome path"
 name=$1
 Read1=$2
 Read2=$3
 ReadBarcode=$4
 Cut=$5 # Minimum uniq fragment per cell to be considered
 CORE=$6
-MyMultiome=/lab/solexa_weissman/cweng/Packages/MyMultiome
-lib=/lab/solexa_weissman/cweng/Packages/cxw486/scATAClib/
+MyMultiome=$7
 
 
 ##Step 1 trim adaptor (Important)
-#cutadapt --cores=$CORE -a CTGTCTCTTATA -A CTGTCTCTTATA -o $Read1.trim -p $Read2.trim $Read1 $Read2
+cutadapt --cores=$CORE -a CTGTCTCTTATA -A CTGTCTCTTATA -o $Read1.trim -p $Read2.trim $Read1 $Read2
 
 ##Step2 Mapping
 #bowtie2Index=/lab/solexa_weissman/cweng/Genomes/GRCH38/GRCH38_Bowtie2_MitoMask/hg38.mitoMask
-#bowtie2 -X 1200  --very-sensitive -p $CORE -x $bowtie2Index -1 $Read1.trim  -2 $Read2.trim | samtools view -@ $CORE -bS - > $name.tmp.bam
+bowtie2 -X 1200  --very-sensitive -p $CORE -x $bowtie2Index -1 $Read1.trim  -2 $Read2.trim | samtools view -@ $CORE -bS - > $name.tmp.bam
 #samtools sort -@ $CORE $name.tmp.bam > $name.bam
 #samtools index -@ $CORE $name.bam
 
@@ -29,7 +30,7 @@ python3 $MyMultiome/MergeBC2Bam.py $name.BC.dic $name.bam  $name
 ##Step4 Get uniq mapped bam and make bulk bigwig and call peaks
 echo "##Step4 Get uniq mapped bam and make bulk bigwig and call peaks"
 samtools view -@ $CORE -bf 2 -q30 $name.tagged.bam > $name.uniqmapped.bam   #309450630/=82% uniq and properly paired
-# $lib/Bam2bw.sh $name.uniqmapped
+# $MyMultiome/Bam2bw.sh $name.uniqmapped   ## No need for mito, this is for making ATAC bigwig for visulization
 
 ##Step5 Get Mito uniqmapped.bam
 echo "##Step5 Get uniq mapped bam and make bulk bigwig and call peaks"
