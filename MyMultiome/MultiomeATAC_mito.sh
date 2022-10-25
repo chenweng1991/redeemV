@@ -9,7 +9,7 @@ ReadBarcode=$4
 Cut=$5 # Minimum uniq fragment per cell to be considered
 CORE=$6
 MyMultiome=$7
-
+bowtie2Index=$8
 
 ##Step 1 trim adaptor (Important)
 cutadapt --cores=$CORE -a CTGTCTCTTATA -A CTGTCTCTTATA -o $Read1.trim -p $Read2.trim $Read1 $Read2
@@ -17,8 +17,8 @@ cutadapt --cores=$CORE -a CTGTCTCTTATA -A CTGTCTCTTATA -o $Read1.trim -p $Read2.
 ##Step2 Mapping
 #bowtie2Index=/lab/solexa_weissman/cweng/Genomes/GRCH38/GRCH38_Bowtie2_MitoMask/hg38.mitoMask
 bowtie2 -X 1200  --very-sensitive -p $CORE -x $bowtie2Index -1 $Read1.trim  -2 $Read2.trim | samtools view -@ $CORE -bS - > $name.tmp.bam
-#samtools sort -@ $CORE $name.tmp.bam > $name.bam
-#samtools index -@ $CORE $name.bam
+samtools sort -@ $CORE $name.tmp.bam > $name.bam
+samtools index -@ $CORE $name.bam
 
 #rm -rf $CORE $name.tmp.bam
 #Step3 Extract cell barcode
@@ -75,3 +75,8 @@ $MyMultiome/MultiATAC_mito.QC_v2.R $name $name.ReadsCounts $name.uniqmapped.frag
 
 ##cleanup
 rm -rf tmp
+rm *trim
+rm -rf *tmp.bam
+rm -rf *uniqmapped.RawBed
+rm -rf *uniqmapped.fragment.0.cut.tsv
+rm -rf *uniqmapped.fragment.0.cut.summary
