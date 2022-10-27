@@ -1,3 +1,5 @@
 mv /lab/solexa_weissman/cweng/Packages/CW_mgatk/ ./mitoConsensus
 
 cp /lab/solexa_weissman/cweng/PlayRoom/ReDeeM_Tutorial/log ./Tutorial_20221025
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Old1Old2/Old1/HSPC/MTenrichCombine/Enrich/Old1_HSPC_Mito.QCplot.png ./source
+cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Old1Old2/Old1/HSPC/MTenrichCombine/mitoV/final/StrandBiase.png ./source
