@@ -8,7 +8,7 @@ from itertools import repeat
 # barcodes="/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210706L1/Qualified_CellBC_ATAC_2k0.2.tb"
 output="TestFolder"
 mito_genome="rCRS"
-script_dir="/lab/solexa_weissman/cweng/Packages/CW_mgatk"
+#script_dir="/lab/solexa_weissman/cweng/Packages/CW_mgatk"
 
 @click.command()
 @click.version_option()
@@ -18,11 +18,11 @@ script_dir="/lab/solexa_weissman/cweng/Packages/CW_mgatk"
 @click.option('--output', '-o', default="mgatk_out", help='Output directory for analysis required for `call` and `bcall`. Default = mgatk_out')
 @click.option('--mito-genome', '-g', default = "rCRS", required=True, help='mitochondrial genome configuration. Choose hg19, hg38, mm10, (etc.) or a custom .fasta file; see documentation. Default = rCRS.')
 @click.option('--barcode-tag', '-bt', default = "BC", required=True, help='tag name see documentation. Default = BC.')
-
+@click.option('--script-dir', '-sd', default = "/lab/solexa_weissman/cweng/Packages/REDEEM-V/mitoConsensus/", required=True, help='')
 # For testing purpose
 
 
-def main(input,ncores,barcodes,output,mito_genome,barcode_tag):
+def main(input,ncores,barcodes,output,mito_genome,barcode_tag,script_dir):
     umi_barcode="XX"
     of = output; tf = of + "/temp"; bcbd = tf + "/barcoded_bams" # bcdb = barcoded bam directory
     folders = [of, tf, bcbd, of + "/final"] #,tf+"/sparse_matrices"
