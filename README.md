@@ -1,10 +1,5 @@
-# mtConsensus
+# REDEEM-V
 
-Recent example folder
-| Time  | Folder |
-| ------------- | ------------- |
-| 2022-7-11  | /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Donor01Reseq/RealHSPC/MTenrichCombine  |
-| 2022-7-11 | /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Donor01Reseq/RealBMMC/MTenrichCombine |
 
 
 MoleculeID | CellBC | Pos | Variant | V-base | Ref-base | FamSize | V-counts | CSS | DB_Cts | SG_Cts | Is+ | Is- | TotalDepth  

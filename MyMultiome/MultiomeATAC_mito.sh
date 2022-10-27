@@ -51,6 +51,7 @@ while getopts "hn:1:2:i:c:t:m:b:q" option; do
 done
 
 ## Exit if any of the necessary input is empty
+echo "MultiomeATAC_mito.sh -h for help info"
 set -u
 : "$name$Read1$Read2$ReadBarcode$Cut$CORE$MyMultiome$bowtie2Index$quick" 
 
@@ -84,6 +85,8 @@ samtools view -@ $CORE -b $name.uniqmapped.bam chrM > $name.uniqmapped.mito.bam
 if [[ quick -eq 1 ]]
   then
     echo "Skipping QC steps, exit"
+    rm -rf *tmp.bam
+    rm *trim
     exit
   else
     echo "Starting QC steps"

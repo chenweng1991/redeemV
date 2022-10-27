@@ -1,2 +1,3 @@
 mv /lab/solexa_weissman/cweng/Packages/CW_mgatk/ ./mitoConsensus
 
+cp /lab/solexa_weissman/cweng/PlayRoom/ReDeeM_Tutorial/log ./Tutorial_20221025

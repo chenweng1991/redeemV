@@ -9,6 +9,30 @@ from progress.bar import Bar
 from collections import defaultdict
 
 
+usage='''
+mitoConsensus.py
+This script perfrom consensus variant calling, 
+Syntax: mitoConsensus <sample> <out_dir> <barcode_tag> <BaseQ_thld_hi>
+
+Inputs
+---
+sample: The prefix, should be barcodes.# check the prefix of /temp/barcoded_bams/ for example. REQUIRED
+out_dir: The folder of the whole analysis. It is usually called CW_mgatk, under which you could find temp, final, etc REQUIRED.
+barcode_tag: The tag name in bam file, which is BC by 10X system
+BaseQ_thld_hi: The base quality score threadhold, which is usually set as 30
+
+output:
+-------
+Generate 4 *.RawGenotypes outputs + 1 *.QualifiedTotalCts with 4 columns output
+
+Acknowledgment:
+---------------
+Inherited some of the codes from https://github.com/caleblareau/mgatk by Caleb Lareau et al. 
+'''
+if len(sys.argv)<5:
+    print("Argument missing")
+    print(usage)
+    quit()
 ########## Section 1, define argument and constant and read files
 ##########
 
@@ -18,8 +42,8 @@ sample=sys.argv[1] #The prefix, should be barcodes.# check the prefix of /temp/b
 out_dir=sys.argv[2] #The folder of the whole analysis. It is usually called CW_mgatk, under which you could find temp, final, etc REQUIRED.
 barcode_tag=sys.argv[3]   ## It is usually "BC"
 BaseQ_thld_hi=int(sys.argv[4]) ## It is usually set as 30
-# BaseQ_thld_mid=int(sys.argv[5]) ## It is usually set as 20, deprecated
 
+    
 barcodes_file =out_dir + "/temp/barcode_files/"+sample+".txt"  ## For example "temp/barcode_files/barcodes.1.txt"
 bam_file =out_dir + "/temp/barcoded_bams/"+sample+".bam"  ## For example "temp/barcoded_bams/barcodes.1.bam"
 mito_ref_file =out_dir + "/final/chrM_refAllele.txt"
@@ -42,6 +66,7 @@ with open(barcodes_file) as barcode_file_handle:
 
 
 bcs = [x.strip() for x in content]
+
 
 
 ########## Section 2 Read bam file make a dictionary from Rname->read1,read2   Basically stick each Read pair, and search by ReadNames
