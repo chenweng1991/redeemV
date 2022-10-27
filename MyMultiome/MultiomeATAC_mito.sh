@@ -1,15 +1,59 @@
 #!/bin/bash
 ## Note:  this version is for miseq or novaseq,  nextseq is slightly different
 
-echo "7 inputs: $1:Prefix, $2:Read1.fq, $3:Read2.fq, $4:i5.fq, $5:0; $6:threads, $7:MyMultiome path"
-name=$1
-Read1=$2
-Read2=$3
-ReadBarcode=$4
-Cut=$5 # Minimum uniq fragment per cell to be considered
-CORE=$6
-MyMultiome=$7
-bowtie2Index=$8
+Help()
+{
+  # Display Help
+  echo "This script trim and map the mtDNA fastqs, generating uniqmapped bam and QC plots "
+  echo
+  echo "MultiomeATAC_mito.sh -h for this page"
+  echo "Syntax: MultiomeATAC_mito.sh -n -1 -2 -i -c -t -m -b"
+  echo "Options"
+  echo "-n name: The prefix of all analyzed files"
+  echo "-1 Read1: Read1 of fastq file (150nt is recommended)"
+  echo "-2 Read2: Read2 of fastq file (150nt is recommended)"
+  echo "-i ReadBarcode: i5 of fastq file (24nt)"
+  echo "-c Cut: the cutoff the uniq fragment per cell"
+  echo "-t CORE: The number of cores to use"
+  echo "-m MyMultiome:The path to the folder of MyMultiome"
+  echo "-b bowtie2Index: the bowtie2 index path/prefix"
+  echo "-q quick, defult is false, if true then exit after uniqmapped.mito.bam, skipping QC step"
+}
+
+quick=0
+while getopts "hn:1:2:i:c:t:m:b:q" option; do
+  case $option in
+    h) # display help
+        Help
+        exit;;
+    n) # The prefix of all analyzed files
+        name=$OPTARG;;
+    1) # Read1 of fastq file
+        Read1=$OPTARG;;
+    2) # Read2 of fastq file
+        Read2=$OPTARG;;
+    i) # index5 fastq file
+        ReadBarcode=$OPTARG;;
+    c) # The cutoff the uniq fragment per cell
+        Cut=$OPTARG;;
+    t) # The number of cores to use
+        CORE=$OPTARG;;
+    m) # The path to the folder of MyMultiome
+        MyMultiome=$OPTARG;;
+    b) # The bowtie2 index path/prefix
+        bowtie2Index=$OPTARG;;
+    q) # if use this option then exit after uniqmapped.mito.bam, skipping QC step
+        quick=1;;
+   \?) # Invalid option
+        echo "Error: Invalid option"
+        exit;;
+  esac
+done
+
+## Exit if any of the necessary input is empty
+set -u
+: "$name$Read1$Read2$ReadBarcode$Cut$CORE$MyMultiome$bowtie2Index$quick" 
+
 
 ##Step 1 trim adaptor (Important)
 cutadapt --cores=$CORE -a CTGTCTCTTATA -A CTGTCTCTTATA -o $Read1.trim -p $Read2.trim $Read1 $Read2
@@ -36,6 +80,14 @@ samtools view -@ $CORE -bf 2 -q30 $name.tagged.bam > $name.uniqmapped.bam   #309
 echo "##Step5 Get uniq mapped bam and make bulk bigwig and call peaks"
 samtools index -@ $CORE $name.uniqmapped.bam
 samtools view -@ $CORE -b $name.uniqmapped.bam chrM > $name.uniqmapped.mito.bam
+
+if [[ quick -eq 1 ]]
+  then
+    echo "Skipping QC steps, exit"
+    exit
+  else
+    echo "Starting QC steps"
+fi
 
 ##Step6 Get raw bed file and Add cell barcode to the fragment bed files
 echo "##Step6 Get raw bed file and Add cell barcode to the fragment bed files"

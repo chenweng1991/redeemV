@@ -1,7 +1,7 @@
 #!/bin/bash
 WD=$1
 Threads=$2
-CW_mgatk=/lab/solexa_weissman/cweng/Packages/CW_mgatk/
+mitoConsensus=$3
 
 if [ -z "$2" ]
 then
@@ -16,9 +16,9 @@ cat $WD/temp/sparse_matrices2.0/*RawGenotypes.VerySensitive >$WD/final/RawGenoty
 cat $WD/temp/sparse_matrices2.0/*RawGenotypes.Sensitive >$WD/final/RawGenotypes.Sensitive
 cat $WD/temp/sparse_matrices2.0/*RawGenotypes.Specific >$WD/final/RawGenotypes.Specific
 
-python3 $CW_mgatk/AddQualifiedTotalCts.py $WD
-Rscript $CW_mgatk/StrandBiases.R $WD 200 0.01
-python $CW_mgatk/RemoveStrandBias.py $WD
+python3 $mitoConsensus/AddQualifiedTotalCts.py $WD
+Rscript $mitoConsensus/StrandBiases.R $WD 200 0.01
+python $mitoConsensus/RemoveStrandBias.py $WD
 
 ##Final counting (Now it is included in the Finalize.sh script)
 let N=0
@@ -28,3 +28,4 @@ for i in $(seq 1 $Threads)
         let N=N+`samtools view $WD/temp/barcoded_bams/barcodes.$i.bam | wc -l`
         done
 echo -e $N > $WD/final/TotalRawBamRows.Mito
+
