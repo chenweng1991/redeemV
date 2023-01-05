@@ -3,15 +3,16 @@
 args = commandArgs(trailingOnly=TRUE)
 
 # Make the dictionary
-ATACWhite<-read.table("/lab/solexa_weissman/cweng/Genomes/10X/WhiteList_10X_Multiome.ATAC")
-RNAWhite<-read.table("/lab/solexa_weissman/cweng/Genomes/10X/WhiteList_10X_Multiome.RNA")
+REDEEM_V<-args[1]
+ATACWhite<-read.table(paste(REDEEM_V,"/source/WhiteList_10X_Multiome.ATAC",sep=""))
+RNAWhite<-read.table(paste(REDEEM_V,"/source/WhiteList_10X_Multiome.RNA",sep=""))
 Dic2<-ATACWhite$V1
 names(Dic2)<-as.character(RNAWhite$V1)
 
 
 # Read in the barcodes.tsv.gz
-RNAbc<-read.table(args[1],col.names="RNABarcode")
+RNAbc<-read.table(args[2],col.names="RNABarcode")
 
 # Translate
 Translated<-data.frame(ATACBArcode=Dic2[gsub("-1","",RNAbc$RNABarcode)])
-write.table(Translated,args[2],row.names=F,col.names=F, quote=F)
+write.table(Translated,args[3],row.names=F,col.names=F, quote=F)
