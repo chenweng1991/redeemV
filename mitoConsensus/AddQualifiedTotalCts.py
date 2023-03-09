@@ -1,7 +1,6 @@
 import sys
 out_dir=sys.argv[1]
 
-# out_dir="/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Donor01_BMMC2_ATACkit/MTenrich/CW_mgatk/"
 
 Total={}
 VerySensitive={}

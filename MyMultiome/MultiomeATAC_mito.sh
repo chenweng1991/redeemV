@@ -18,10 +18,12 @@ Help()
   echo "-m MyMultiome:The path to the folder of MyMultiome"
   echo "-b bowtie2Index: the bowtie2 index path/prefix"
   echo "-q quick, defult is false, if true then exit after uniqmapped.mito.bam, skipping QC step"
+  echo "-p premap, default is false, if true then exit after mapping."
 }
 
 quick=0
-while getopts "hn:1:2:i:c:t:m:b:q" option; do
+premap=0
+while getopts "hn:1:2:i:c:t:m:b:q:p" option; do
   case $option in
     h) # display help
         Help
@@ -44,6 +46,8 @@ while getopts "hn:1:2:i:c:t:m:b:q" option; do
         bowtie2Index=$OPTARG;;
     q) # if use this option then exit after uniqmapped.mito.bam, skipping QC step
         quick=1;;
+    p) # If use this option then exit after mapping, skipping the rest. 
+        premap=1;;
    \?) # Invalid option
         echo "Error: Invalid option"
         exit;;
@@ -56,6 +60,7 @@ set -u
 : "$name$Read1$Read2$ReadBarcode$Cut$CORE$MyMultiome$bowtie2Index$quick" 
 
 
+! test -e $name.bam && {
 ##Step 1 trim adaptor (Important)
 cutadapt --cores=$CORE -a CTGTCTCTTATA -A CTGTCTCTTATA -o $Read1.trim -p $Read2.trim $Read1 $Read2
 
@@ -64,6 +69,16 @@ cutadapt --cores=$CORE -a CTGTCTCTTATA -A CTGTCTCTTATA -o $Read1.trim -p $Read2.
 bowtie2 -X 1200  --very-sensitive -p $CORE -x $bowtie2Index -1 $Read1.trim  -2 $Read2.trim | samtools view -@ $CORE -bS - > $name.tmp.bam
 samtools sort -@ $CORE $name.tmp.bam > $name.bam
 samtools index -@ $CORE $name.bam
+}
+
+# Exit here if -p option is enabled
+if [[ premap -eq 1 ]]
+  then
+    echo "Mapping has completed, Only mapping, exit"
+    exit
+  else
+    echo "Mapping has completed, Next------"
+fi
 
 #rm -rf $CORE $name.tmp.bam
 #Step3 Extract cell barcode
@@ -82,6 +97,7 @@ echo "##Step5 Get uniq mapped bam and make bulk bigwig and call peaks"
 samtools index -@ $CORE $name.uniqmapped.bam
 samtools view -@ $CORE -b $name.uniqmapped.bam chrM > $name.uniqmapped.mito.bam
 
+# Exit here if -q option is enabled
 if [[ quick -eq 1 ]]
   then
     echo "Skipping QC steps, exit"
