@@ -1,4 +1,4 @@
-.libPaths(c('/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal',.libPaths()))
+#.libPaths(c('/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal',.libPaths()))
 library(plyr)
 library(dplyr)
 library(ggplot2)
