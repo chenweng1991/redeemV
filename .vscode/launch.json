@@ -4,12 +4,15 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
+            "args":["/lab/solexa_weissman/cweng/Projects/Collaborator/Roman_NK/Data_220907_Pilot3/REDEEM-V/source/Test/BC_database.db","/lab/solexa_weissman/cweng/Projects/Collaborator/Roman_NK/Data_220907_Pilot3/REDEEM-V/source/Test/Test.bam","TestSQL","--num_cores","16"],
+            "cwd": "/lab/solexa_weissman/cweng/Projects/Collaborator/Roman_NK/Data_220907_Pilot3/REDEEM-V/source/Test"
             "justMyCode": true
         }
     ]
