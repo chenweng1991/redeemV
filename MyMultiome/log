@@ -15,3 +15,9 @@ cp /lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210706L1/test/Mul
 #2022-10-25
 cp /lab/solexa_weissman/cweng/Packages/cxw486/scATAClib/Bam2bw.sh ./
 
+#2023-7-25
+mv MergeBC2Bam_SQLite.py Legacy/
+mv MakeBC.SQLite.Nextseq_Nova1.5.py Legacy/
+
+
+

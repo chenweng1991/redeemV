@@ -1,5 +1,6 @@
 #!/bin/bash
-## Note:  this version is for miseq or novaseq,  nextseq is slightly different
+## Note:  this version is for illumina reverse complement workflow, including nextseq, Novaseq 6000 with v1.5 reagent kits (i.e., Reverse complement chemistry)
+## 
 
 Help()
 {
@@ -64,9 +65,12 @@ set -u
 ##Step 1 trim adaptor (Important)
 cutadapt --cores=$CORE -a CTGTCTCTTATA -A CTGTCTCTTATA -o $Read1.trim -p $Read2.trim $Read1 $Read2
 
-##Step2 Mapping
+##Step 2 Add cell barcode to the readname of  
+python3 $MyMultiome/AddBC2Fastq.py $Read1.trim $Read2.trim $ReadBarcode $Read1.trim.BC $Read2.trim.BC
+
+##Step3 Mapping Sorting and Indexing
 #bowtie2Index=/lab/solexa_weissman/cweng/Genomes/GRCH38/GRCH38_Bowtie2_MitoMask/hg38.mitoMask
-bowtie2 -X 1200  --very-sensitive -p $CORE -x $bowtie2Index -1 $Read1.trim  -2 $Read2.trim | samtools view -@ $CORE -bS - > $name.tmp.bam
+bowtie2 -X 1200  --very-sensitive -p $CORE -x $bowtie2Index -1 $Read1.trim.BC  -2 $Read2.trim.BC | samtools view -@ $CORE -bS - > $name.tmp.bam
 samtools sort -@ $CORE $name.tmp.bam > $name.bam
 samtools index -@ $CORE $name.bam
 }
@@ -81,19 +85,17 @@ if [[ premap -eq 1 ]]
 fi
 
 #rm -rf $CORE $name.tmp.bam
-#Step3 Extract cell barcode
+#Step4 Extract cell barcode
 echo "##Step3 Extract cell barcode"
-python3 $MyMultiome/MakeBC.ATAC.I2.10X.Nextseq_Nova1.5.py ${ReadBarcode}  > $name.BC.dic
-python3 $MyMultiome/MergeBC2Bam.py $name.BC.dic $name.bam  $name
+python3 $MyMultiome/AddBC2BAM.py $name.bam $name.tagged.bam
 
 
-##Step4 Get uniq mapped bam and make bulk bigwig and call peaks
+##Step4 Get uniq mapped bam 
 echo "##Step4 Get uniq mapped bam and make bulk bigwig and call peaks"
-samtools view -@ $CORE -bf 2 -q30 $name.tagged.bam > $name.uniqmapped.bam   #309450630/=82% uniq and properly paired
-# $MyMultiome/Bam2bw.sh $name.uniqmapped   ## No need for mito, this is for making ATAC bigwig for visulization
+samtools view -@ $CORE -bf 2 -q30 $name.tagged.bam > $name.uniqmapped.bam 
 
 ##Step5 Get Mito uniqmapped.bam
-echo "##Step5 Get uniq mapped bam and make bulk bigwig and call peaks"
+echo "Get Mito uniqmapped.bam"
 samtools index -@ $CORE $name.uniqmapped.bam
 samtools view -@ $CORE -b $name.uniqmapped.bam chrM > $name.uniqmapped.mito.bam
 
@@ -109,30 +111,16 @@ if [[ quick -eq 1 ]]
 fi
 
 ##Step6 Get raw bed file and Add cell barcode to the fragment bed files
-echo "##Step6 Get raw bed file and Add cell barcode to the fragment bed files"
-samtools sort -@ $CORE -n $name.uniqmapped.bam| bedtools bamtobed -bedpe -i stdin | awk -v OFS='\t' '{print $1,$2,$6,$7}' >$name.uniqmapped.RawBed
-python3 $MyMultiome/MergeBC2Bed.10X.py $name.BC.dic  $name.uniqmapped.RawBed  | sort -k1,1 -k2,2 -k3,3n -k4,4n -k5,5 >$name.uniqmapped.RawBed.Sort.Tag
+samtools sort -@ $CORE -n $name.uniqmapped.mito.bam | bedtools bamtobed -bedpe -i stdin | awk -v OFS='\t' '{split($7,name,"|"); print name[2],$1,$2,$6,$7}' | sort -k1,1 -k2,2 -k3,3n -k4,4n -k5,5 > $name.uniqmapped.RawBed.mito.Sort.Tag
+
 
 #Step7 deduplicate at single cell monoclonal tsv
 echo "##Step7 deduplicate at single cell monoclonal tsv"
-python3 $MyMultiome/DeduplicateRawBed.10X.py $name.uniqmapped.RawBed.Sort.Tag $Cut #  This will generate $name.uniqmapped.fragment.tsv and $name.uniqmapped.fragment.1000cut.tsv
+python3 $MyMultiome/DeduplicateRawBed.10X.py $name.uniqmapped.RawBed.mito.Sort.Tag $name.uniqmapped.fragment.$Cut.cut.mito.tsv --cutoff $Cut 
 
-##Step8 Extract Mito monoclonal tsv
-echo "Step8 Extract Mito monoclonal tsv"
-grep chrM $name.uniqmapped.fragment.$Cut.cut.tsv > $name.uniqmapped.fragment.$Cut.cut.mito.tsv
-
-##Step9 Make Peak VS Cell sparse matrix
-echo "Skip Step9 Make Peak VS Cell sparse matrix"
-# mkdir tmp
-# cat $name.uniqmapped.fragment.$Cut.cut.tsv | awk '{print > "tmp/"$4}'
-# for f in `ls tmp/`
-# do
-#   bedtools intersect -a $name.uniqmapped_peaks.narrowPeak -b tmp/$f -c | awk -v name=$f '{if($11>0){print $1"_"$2"_"$3,name,$11}}' OFS="\t" >> $name.uniqmapped.Peak_bc_sparse_mtx
-# done
 
 ##Step10 Summarize
 echo "Step10 Summarize"
-cat $name.uniqmapped.fragment.$Cut.cut.tsv | python3 $MyMultiome/Summarize.TagDedup.10X.py > $name.uniqmapped.fragment.$Cut.cut.summary
 cat $name.uniqmapped.fragment.$Cut.cut.mito.tsv | python3 $MyMultiome/Summarize.TagDedup.10X.py > $name.uniqmapped.fragment.$Cut.cut.mito.summary
 
 

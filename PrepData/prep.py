@@ -1,12 +1,35 @@
+"""
+This script is used prepare data from ReDeeM.
+According the configuration file and the Data.summary in the fastq folder(s)
+https://github.com/chenweng1991/redeemV/wiki/Organize-ReDeeM-full-data
+
+Usage:
+    python prep.py ini
+
+Arguments:
+    ini: This is the only argument. It is the path to the configuration file
+
+Examples:
+    python REDEEM-V/PrepData/prep.py prepdata.ini > PrepData.log
+
+Author:
+    Chen Weng <cweng@wi.mit.edu>
+"""
+
 import pandas as pd
 import configparser
+import argparse
 import sys
 import os
 
-# arguments=sys.argv
-arguments=['/lab/solexa_weissman/cweng/Projects/Collaborator/Roman_NK/Data_220907_Pilot3/REDEEM-V/PrepData/prep.py','/lab/solexa_weissman/cweng/Projects/Collaborator/Roman_NK/Data_220907_Pilot3/prepdata.ini']
+# Parse argument
+parser = argparse.ArgumentParser(description='This script is used prepare data from ReDeeM.According the configuration file and the Data.summary in the fastq folder(s).')
+parser.add_argument('ini', help='It is the path to the configuration file')
+
+args = parser.parse_args()
+
 config = configparser.ConfigParser()
-config.read(arguments[1])
+config.read(args.ini)
 
 # Access input folders from the config file
 fq_folders = config.get('Input', 'fq_folders').split(', ')
@@ -30,7 +53,7 @@ else:
     print("Error: do you have a mtDNA specific set of fastqs? Clarify in the ini file")
 
 # Create folders  
-Create=arguments[0].replace("prep.py","Create.sh")  
+Create=sys.argv[0].replace("prep.py","Create.sh")  
 out = config.get('output', 'out')
 for sample in samples:
     shell_script=Create+' '+out+"/"+sample
@@ -38,7 +61,7 @@ for sample in samples:
     
 # softlink or perform fastx_trimmer for each 
 parallel= " &" if config.getboolean('Parameters', 'parallel')  else " "
-## Write ATAC, RNA and Mito (if Mito is in summary table, and mitofq=False)
+## Write ATAC, RNA and Mito (if Mito is in summary table, and mitofq=True)
 for sample in samples:
     for assay in assays:
         summary_sample_assay=summary[(summary.iloc[:,1]==sample) & (summary.iloc[:,2]==assay)]
@@ -49,7 +72,7 @@ for sample in samples:
             if row[3] =="notrim":
                 shell_script="ln -s "+row[0]+" "+outfolder+row["outfile"]
             else:
-                shell_script="zcat " +row[0]+" | fastx_trimmer -f 1 -l " +row[3]+" -z -o "+outfolder+row["outfile"]+".trimmed"+parallel
+                shell_script="zcat " +row[0]+" | fastx_trimmer -f 1 -l " +row[3]+" -z -o "+outfolder+row["outfile"]+parallel
             print(shell_script)
             os.system(shell_script)
 
