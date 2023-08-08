@@ -1,7 +1,8 @@
 #!/bin/bash
 ## Note:  this version is for illumina reverse complement workflow, including nextseq, Novaseq 6000 with v1.5 reagent kits (i.e., Reverse complement chemistry)
-## 
-
+## Author: Chen Weng
+## Date: 2022-10-27
+## Updated: 2023-08-04
 Help()
 {
   # Display Help
@@ -56,7 +57,9 @@ while getopts "hn:1:2:i:c:t:m:b:q:p" option; do
 done
 
 ## Exit if any of the necessary input is empty
-echo "MultiomeATAC_mito.sh -h for help info"
+
+echo "This is Memory saving version updated 2023-8-4"
+echo "Please run MultiomeATAC_mito.sh -h for help info"
 set -u
 : "$name$Read1$Read2$ReadBarcode$Cut$CORE$MyMultiome$bowtie2Index$quick" 
 
