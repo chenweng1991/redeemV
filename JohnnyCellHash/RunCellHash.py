@@ -2,6 +2,7 @@ import sys
 args = sys.argv
 REDEEM_V=args[1]
 sys.path.append(REDEEM_V+"/JohnnyCellHash/")
+print(sys.path)
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
