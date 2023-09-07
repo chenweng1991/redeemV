@@ -11,8 +11,8 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args":["/lab/solexa_weissman/cweng/Projects/Collaborator/Roman_NK/Data_220907_Pilot3/REDEEM-V/source/Test/BC_database.db","/lab/solexa_weissman/cweng/Projects/Collaborator/Roman_NK/Data_220907_Pilot3/REDEEM-V/source/Test/Test.bam","TestSQL","--num_cores","16"],
-            "cwd": "/lab/solexa_weissman/cweng/Projects/Collaborator/Roman_NK/Data_220907_Pilot3/REDEEM-V/source/Test"
+            "args":["HSC-10_1.mito.cram"],
+            "cwd": "/lab/solexa_weissman/cweng/Projects/Collaborator/Sahand_Hormoz/190311_WGS_Broad/Mitochondrial"
             "justMyCode": true
         }
     ]
