@@ -1,7 +1,34 @@
-# REDEEM-V
-# Introduction
-REDEEM-V is one of the 2 components in REDEEM framework
-- [REDEEM-V](https://github.com/chenweng1991/REDEEM-V) for consensus variant calling)
-- [REDEEM-R](https://github.com/chenweng1991/REDEEM-R) for downstream lineage tracing analysis
+# redeemV
+## Introduction
+ReDeeM: single-cell Regulatory multi-omics with Deep Mitochondrial mutation profiling. ReDeeM is a single-cell multiomics platform featuring ultra-sensitive mitochondrial DNA (mtDNA) variant calling and joint RNA+ATAC profiling. ReDeeM enables fine-scale lineage tracing at single cell level, allowing for subclonal and phylogenetic analyses, with simultaneous integrative analyses of cell-state and gene regulatory circuits.</br> 
 
-For detailed usage of REDEEM-V, check the [tutorial](https://github.com/chenweng1991/REDEEM-V/blob/master/Tutorial_20221025.md)
+The analytical pipelines for ReDeeM analysis includes two parts:
+- [redeemV](https://github.com/chenweng1991/REDEEM-V) for consensus variant calling (current page)
+- [redeemR](https://github.com/chenweng1991/REDEEM-R) for downstream lineage tracing analysis
+
+**redeemV** is a streamlined pipeline taking advantage of endogenous unique molecular identifier (eUMI) for consensus-based error correction in single-cell mitochondrial DNA mutation detection. 
+![Github fig variant calling strategy](https://github.com/chenweng1991/redeemV/assets/43254272/e20c55b3-056a-4e1f-bacf-73c9b4a5ae63)
+## Installation and usage
+redeemV includes a set of ready-to-use Python scripts
+```
+git clone https://github.com/chenweng1991/redeemV.git
+```
+Please check the [tutorial](https://github.com/chenweng1991/REDEEM-V/blob/master/Tutorial_20221025.md)
+(A small set of example fastq files are included)
+
+## Additional documentation
+- [ReDeeM data structure](https://github.com/chenweng1991/redeemV/wiki/Organize-ReDeeM-full-data)
+- [Run Cellranger-arc](https://github.com/chenweng1991/redeemV/wiki/Run-cellranger%E2%80%90arc)
+- [Cell hashing processing](https://github.com/chenweng1991/redeemV/wiki/Cell-Hashing-Demultiplexing)
+
+## Citation
+Please check out our study of human hematopoiesis using ReDeeM [Deciphering cell states and genealogies of human hematopoiesis](https://doi.org/10.1038/s41586-024-07066-z)
+
+## Contact
+If you have any questions or suggestions, please feel free to contact us. Feedbacks are very welcome! (Chen Weng, cweng@broadinstitute.org)
+
+
+
+
+
+
