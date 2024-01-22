@@ -3,8 +3,8 @@
 ReDeeM: single-cell **Re**gulatory multi-omics with **Dee**p **M**itochondrial mutation profiling. ReDeeM is a single-cell multiomics platform featuring ultra-sensitive mitochondrial DNA (mtDNA) variant calling and joint RNA+ATAC profiling. ReDeeM enables fine-scale lineage tracing at single cell level, allowing for subclonal and phylogenetic analyses, with simultaneous integrative analyses of cell-state and gene regulatory circuits.</br> 
 
 The analytical pipelines for ReDeeM analysis includes two parts:
-- [redeemV](https://github.com/chenweng1991/REDEEM-V) for consensus variant calling (current page)
-- [redeemR](https://github.com/chenweng1991/REDEEM-R) for downstream lineage tracing analysis
+- [redeemV](https://github.com/chenweng1991/redeemV) is set of in-house Bash pipeline and python scripts for mapping and deep mitochondrial mutation calling. (**This page**, Input from rawdata) 
+- [redeemR](https://github.com/chenweng1991/redeemR) is an in-house R package for downstream lineage tracing and single cell integrative analysis. (Input from redeemV)
 
 **redeemV** is a streamlined pipeline taking advantage of endogenous unique molecular identifier (eUMI) for consensus-based error correction in single-cell mitochondrial DNA mutation detection. 
 ![Github fig variant calling strategy](https://github.com/chenweng1991/redeemV/assets/43254272/e20c55b3-056a-4e1f-bacf-73c9b4a5ae63)
