@@ -64,19 +64,32 @@ set -u
 : "$name$Read1$Read2$ReadBarcode$Cut$CORE$MyMultiome$bowtie2Index$quick" 
 
 
-! test -e $name.bam && {
 ##Step 1 trim adaptor (Important)
-cutadapt --cores=$CORE -a CTGTCTCTTATA -A CTGTCTCTTATA -o $Read1.trim -p $Read2.trim $Read1 $Read2
+if [ ! -f "$Read1.trim" ]; then
+  echo "Running step 1 trim adaptor..."
+  cutadapt --cores=$CORE -a CTGTCTCTTATA -A CTGTCTCTTATA -o $Read1.trim -p $Read2.trim $Read1 $Read2
+else
+  echo "$Read1.trim and $Read2.trim exist. Skip Step 1"
+fi
 
-##Step 2 Add cell barcode to the readname of  
-python3 $MyMultiome/AddBC2Fastq.py $Read1.trim $Read2.trim $ReadBarcode $Read1.trim.BC $Read2.trim.BC
+##Step 2 Add cell barcode to the readname
+if [ ! -f "$Read1.trim.BC" ]; then
+  echo "Running step 2 Add cell barcode to the readname..."
+  python3 $MyMultiome/AddBC2Fastq.py $Read1.trim $Read2.trim $ReadBarcode $Read1.trim.BC $Read2.trim.BC
+else
+  echo "$Read1.trim.BC and $Read2.trim.BC exist. Skip Step 2."
+fi
 
 ##Step3 Mapping Sorting and Indexing
 #bowtie2Index=/lab/solexa_weissman/cweng/Genomes/GRCH38/GRCH38_Bowtie2_MitoMask/hg38.mitoMask
-bowtie2 -X 1200  --very-sensitive -p $CORE -x $bowtie2Index -1 $Read1.trim.BC  -2 $Read2.trim.BC | samtools view -@ $CORE -bS - > $name.tmp.bam
-samtools sort -@ $CORE $name.tmp.bam > $name.bam
-samtools index -@ $CORE $name.bam
-}
+if [ ! -f "$name.bam" ]; then
+  echo "Running step3 Mapping Sorting and Indexing..."
+  bowtie2 -X 1200  --very-sensitive -p $CORE -x $bowtie2Index -1 $Read1.trim.BC  -2 $Read2.trim.BC | samtools view -@ $CORE -bS - > $name.tmp.bam
+  samtools sort -@ $CORE $name.tmp.bam > $name.bam
+  samtools index -@ $CORE $name.bam
+else 
+  echo "$name.bam exist. Skip Step 3."
+fi
 
 # Exit here if -p option is enabled
 if [[ premap -eq 1 ]]
@@ -87,20 +100,30 @@ if [[ premap -eq 1 ]]
     echo "Mapping has completed, Next------"
 fi
 
-#rm -rf $CORE $name.tmp.bam
 #Step4 Extract cell barcode
-echo "##Step3 Extract cell barcode"
-python3 $MyMultiome/AddBC2BAM.py $name.bam $name.tagged.bam
+if [ ! -f "$name.bam" ]; then
+  echo "Running step 4 Extract cell barcode..."
+  python3 $MyMultiome/AddBC2BAM.py $name.bam $name.tagged.bam
+else
+  echo "$name.tagged.bam exist. Skip Step 4."
+fi
 
+##Step5 Get uniq mapped bam 
+if [ ! -f "$name.uniqmapped.bam" ]; then
+  echo "Runing step 5 Get uniq mapped bam..."
+  samtools view -@ $CORE -bf 2 -q30 $name.tagged.bam > $name.uniqmapped.bam 
+else
+  echo "$name.uniqmapped.bam exist. Skip Step 5."
+fi
 
-##Step4 Get uniq mapped bam 
-echo "##Step4 Get uniq mapped bam and make bulk bigwig and call peaks"
-samtools view -@ $CORE -bf 2 -q30 $name.tagged.bam > $name.uniqmapped.bam 
-
-##Step5 Get Mito uniqmapped.bam
-echo "Get Mito uniqmapped.bam"
-samtools index -@ $CORE $name.uniqmapped.bam
-samtools view -@ $CORE -b $name.uniqmapped.bam chrM > $name.uniqmapped.mito.bam
+##Step6 Get Mito uniqmapped.bam
+if [ ! -f "$name.uniqmapped.mito.bam" ]; then
+  echo "Running step 6 Get Mito uniqmapped.bam..."
+  samtools index -@ $CORE $name.uniqmapped.bam
+  samtools view -@ $CORE -b $name.uniqmapped.bam chrM > $name.uniqmapped.mito.bam
+else
+  echo "$name.uniqmapped.mito.bam. Skip Step 6."
+fi
 
 # Exit here if -q option is enabled
 if [[ quick -eq 1 ]]
@@ -113,32 +136,58 @@ if [[ quick -eq 1 ]]
     echo "Starting QC steps"
 fi
 
-##Step6 Get raw bed file and Add cell barcode to the fragment bed files
-samtools sort -@ $CORE -n $name.uniqmapped.mito.bam | bedtools bamtobed -bedpe -i stdin | awk -v OFS='\t' '{split($7,name,"|"); print name[2],$1,$2,$6,$7}' | sort -k1,1 -k2,2 -k3,3n -k4,4n -k5,5 > $name.uniqmapped.RawBed.mito.Sort.Tag
+##Step7 Get raw bed file and Add cell barcode to the fragment bed files
+if [ ! -f "$name.uniqmapped.RawBed.mito.Sort.Tag" ]; then
+  echo "Running step 7 Get raw bed file and Add cell barcode to the fragment bed files..."
+  samtools sort -@ $CORE -n $name.uniqmapped.mito.bam | bedtools bamtobed -bedpe -i stdin | awk -v OFS='\t' '{split($7,name,"|"); print name[2],$1,$2,$6,$7}' | sort -k1,1 -k2,2 -k3,3n -k4,4n -k5,5 > $name.uniqmapped.RawBed.mito.Sort.Tag
+else
+  echo "$name.uniqmapped.RawBed.mito.Sort.Tag. Skip Step 7."
+fi
+
+#Step8 deduplicate at single cell monoclonal tsv
+if [ ! -f "$name.uniqmapped.fragment.$Cut.cut.mito.tsv" ]; then
+  echo "Running step7 deduplicate at single cell monoclonal tsv..."
+  python3 $MyMultiome/DeduplicateRawBed.10X.py $name.uniqmapped.RawBed.mito.Sort.Tag $name.uniqmapped.fragment.$Cut.cut.mito.tsv --cutoff $Cut 
+else
+  echo "$name.uniqmapped.fragment.$Cut.cut.mito.tsv eise. Skip Step 8."
+fi
+
+##Step9 Summarize
+if [ ! -f "$name.uniqmapped.fragment.$Cut.cut.mito.summary" ]; then
+  echo "Running step9 Summarize..."
+  cat $name.uniqmapped.fragment.$Cut.cut.mito.tsv | python3 $MyMultiome/Summarize.TagDedup.10X.py > $name.uniqmapped.fragment.$Cut.cut.mito.summary
+else
+  echo "$name.uniqmapped.fragment.$Cut.cut.mito.summary exist. Skip step 9."
+fi
+
+##Step10 ReadsCount
+if [ ! -f "$name.ReadsCounts" ]; then
+  echo "Running step10 ReadsCount..."
+  $MyMultiome/Counts.2.sh $name
+else
+  echo "$name.ReadsCounts exist. Skip step 10."
+fi
+
+##Step 11 Plot QC
+if [ ! -f "$name.QCplot.png" ]; then
+  echo "Running step 11 Plot QC..."
+  $MyMultiome/MultiATAC_mito.QC_v2.R $name $name.ReadsCounts $name.uniqmapped.fragment.$Cut.cut.mito.summary $name.uniqmapped.fragment.$Cut.cut.mito.tsv
+else
+  echo "$name.QCplot.png exist. Skip Step 11"
+fi
 
 
-#Step7 deduplicate at single cell monoclonal tsv
-echo "##Step7 deduplicate at single cell monoclonal tsv"
-python3 $MyMultiome/DeduplicateRawBed.10X.py $name.uniqmapped.RawBed.mito.Sort.Tag $name.uniqmapped.fragment.$Cut.cut.mito.tsv --cutoff $Cut 
 
-
-##Step10 Summarize
-echo "Step10 Summarize"
-cat $name.uniqmapped.fragment.$Cut.cut.mito.tsv | python3 $MyMultiome/Summarize.TagDedup.10X.py > $name.uniqmapped.fragment.$Cut.cut.mito.summary
-
-
-##Step11 ReadsCount
-echo "Step11 ReadsCount"
-$MyMultiome/Counts.2.sh $name
-
-##Simple Plot QC
-echo "Step12 Plot QC"
-$MyMultiome/MultiATAC_mito.QC_v2.R $name $name.ReadsCounts $name.uniqmapped.fragment.$Cut.cut.mito.summary $name.uniqmapped.fragment.$Cut.cut.mito.tsv
-
-##cleanup
-rm -rf tmp
-rm *trim
-rm -rf *tmp.bam
-rm -rf *uniqmapped.RawBed
-rm -rf *uniqmapped.fragment.0.cut.tsv
-rm -rf *uniqmapped.fragment.0.cut.summary
+##Final step cleanup
+if [ ! -f "$name.QCplot.png" ]; then
+  echo "Script running with error. Please check Log."
+else
+  echo "Script run complete successfully and got QC plot."
+  echo "cleaning up."
+  rm -rf tmp
+  rm *trim
+  rm -rf *tmp.bam
+  rm -rf *uniqmapped.RawBed
+  rm -rf *uniqmapped.fragment.0.cut.tsv
+  rm -rf *uniqmapped.fragment.0.cut.summary
+fi

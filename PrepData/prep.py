@@ -39,7 +39,7 @@ for folder in fq_folders:
     summary.iloc[:,0]=folder+"/"+summary.iloc[:,0]
     dfs.append(summary)
 summary=pd.concat(dfs,axis=0)
-
+print(summary)
 # Define samples and assays
 ExpectMito = config.getboolean('Parameters', 'mitofq')
 samples=summary.iloc[:,1].unique()

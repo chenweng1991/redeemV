@@ -28,6 +28,13 @@ Generate 4 *.RawGenotypes outputs + 1 *.QualifiedTotalCts with 4 columns output
 Acknowledgment:
 ---------------
 Inherited some of the codes from https://github.com/caleblareau/mgatk by Caleb Lareau et al. 
+
+Updates:
+This is updated version that prevent from calling mutations that are on end with wrong orientation
+Specifically, no mutation calling in regions forward reference start > reverse reference start
+              no mutation calling in regions forward reference end > reverse reference start
+Changes in Section 3              
+Exploratory analysis here /lab/solexa_weissman/cweng/Projects/Collaborator/Caleb/Review_consensus.ipynb
 '''
 if len(sys.argv)<5:
     print("Argument missing")
@@ -54,7 +61,7 @@ out_genotypeSpecific_file=out_dir + "/temp/sparse_matrices2.0/"+sample+".RawGeno
 out_totalCts_file=out_dir + "/temp/sparse_matrices2.0/"+sample+".QualifiedTotalCts"
 
 if not 'sparse_matrices2.0' in os.listdir(out_dir +"/temp"):
-    os.makedirs(out_dir+"/temp/sparse_matrices2.0", exist_ok=True)
+    os.mkdir(out_dir+"/temp/sparse_matrices2.0")
 
 
 #Read in the mito reference
@@ -130,11 +137,21 @@ for m in MoleculeDict:
         quality_1=ReadPairDict[read_pair][1].query_qualities
         pos_array_0=np.asarray(ReadPairDict[read_pair][0].get_aligned_pairs(matches_only=True))
         pos_array_1=np.asarray(ReadPairDict[read_pair][1].get_aligned_pairs(matches_only=True))
+        ##~~~~~~~~~~ The revised updated chunk of code from here 2024-5024
         pos_array_overlap=np.intersect1d(pos_array_0[:,1],pos_array_1[:,1])
-        pos_array_specific_0=pos_array_0[~np.isin(pos_array_0[:,1],pos_array_overlap)]
-        pos_array_specific_1=pos_array_1[~np.isin(pos_array_1[:,1],pos_array_overlap)]
         pos_array_overlap_0=pos_array_0[np.isin(pos_array_0[:,1],pos_array_overlap)]
         pos_array_overlap_1=pos_array_1[np.isin(pos_array_1[:,1],pos_array_overlap)]
+        if ReadPairDict[read_pair][0].is_reverse:
+            rev_end=ReadPairDict[read_pair][0].reference_end
+            fwd_start=ReadPairDict[read_pair][1].reference_start
+            pos_array_specific_0=pos_array_0[(pos_array_0[:,1]>=fwd_start) & (~np.isin(pos_array_0[:,1],pos_array_overlap))]
+            pos_array_specific_1=pos_array_1[(pos_array_1[:,1]<rev_end) & (~np.isin(pos_array_1[:,1],pos_array_overlap))]
+        else:
+            rev_end=ReadPairDict[read_pair][1].reference_end
+            fwd_start=ReadPairDict[read_pair][0].reference_start
+            pos_array_specific_0=pos_array_0[(pos_array_0[:,1]<rev_end) & (~np.isin(pos_array_0[:,1],pos_array_overlap))]
+            pos_array_specific_1=pos_array_1[(pos_array_1[:,1]>=fwd_start) & (~np.isin(pos_array_1[:,1],pos_array_overlap))]
+        ##~~~~~~~~~~~The revised updated chunk of code finish here
         ## Collect genotype for the specific_0, or the non-overlapped left part
         if len(pos_array_specific_0)>0:
             for base_0 in pos_array_specific_0:
