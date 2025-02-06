@@ -17,46 +17,19 @@ Usage:
 import gzip
 import argparse
 
-def is_gzip_file(filepath):
-    try:
-        with gzip.open(filepath, 'rb') as f:
-            f.read(1)
-        return True
-    except OSError:
-        return False
-    
 def open_file(filepath, mode, buffering=-1):
-    if is_gzip_file(filepath):
+    if filepath.endswith('.gz'):
         return gzip.open(filepath, mode)
     else:
-        return open(filepath, mode,buffering=buffering)
+        return open(filepath, mode, buffering=buffering)
 
-# def reverse(seq):
-#     """Returns a reversed string"""
-#     return seq[::-1]
-
-
-# def complement(seq):
-#     """Returns a complement DNA sequence"""
-#     complement_dict = {'A': 'T', 'C': 'G', 'T': 'A', 'G': 'C', 'N': 'N'}
-#     seq_list = list(seq)
-#     seq_list = [complement_dict[base] for base in seq_list]
-#     return ''.join(seq_list)
-
-# def reverse_complement(seq):
-#     """"Returns a reverse complement DNA sequence"""
-#     seq = reverse(seq)
-#     seq = complement(seq)
-#     return seq
 TRANSLATION_TABLE = str.maketrans('ATCG', 'TAGC')
 def reverse_complement(seq):
     return seq[::-1].translate(TRANSLATION_TABLE)
 
-
-
 def write_fastq_file(in_file, out_file, barcode):
     read_line = next(in_file).strip().split()[0]
-    out_file.write(read_line + '|' + barcode + '\n')
+    out_file.write((read_line + '|' + barcode + '\n'))
     out_file.write(next(in_file))  # sequence
     out_file.write(next(in_file))  # separator
     out_file.write(next(in_file))  # quality

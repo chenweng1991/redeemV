@@ -1,13 +1,17 @@
-name=$1
-TotalReadsPair=$(expr `samtools view $name.bam | wc -l` / 2)
-TotalMitoReadsPair=$(expr `samtools view $name.bam |grep chrM | wc -l` / 2)
-UniqProperpairReadsPair=$(expr `samtools view $name.uniqmapped.bam | wc -l` / 2)
-MitoReadsPair=$(expr `samtools view $name.uniqmapped.mito.bam| wc -l` / 2)
+inbam=$1
+outfile=$2
+ncores=$3
 
+if [ ! -s "$inbam.bai" ]; then
+    samtools index $inbam
+fi
 
+TotalReadsPair=$(expr `samtools view -@ $ncores -c $inbam` / 2)
+TotalMitoReadsPair=$(expr `samtools view -@ $ncores -c $inbam chrM` / 2)
+UniqProperpairReadsPair=$(expr `samtools view -@ $ncores -c $inbam -bf 2 -q30` / 2)
+MitoReadsPair=$(expr `samtools view -@ $ncores -c $inbam -bf 2 -q30 chrM` / 2)
 
-
-echo -ne "TotalReads\t$TotalReadsPair\n" >$name.ReadsCounts
-echo -ne "TotalMitoReads\t$TotalMitoReadsPair\n" >>$name.ReadsCounts
-echo -ne "UniqProperpairReads\t$UniqProperpairReadsPair\n" >>$name.ReadsCounts
-echo -ne "MitoReadsPair\t$MitoReadsPair\n" >>$name.ReadsCounts
+echo -ne "TotalReads\t$TotalReadsPair\n" >$outfile
+echo -ne "TotalMitoReads\t$TotalMitoReadsPair\n" >>$outfile
+echo -ne "UniqProperpairReads\t$UniqProperpairReadsPair\n" >>$outfile
+echo -ne "MitoReadsPair\t$MitoReadsPair\n" >>$outfile

@@ -1,0 +1,30 @@
+name: redeemV
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3
+  - htslib
+  - cutadapt
+  - bowtie2
+  - samtools
+  - bedtools
+  
+  # Python package dependencies
+  - pip
+  - pip:
+    - progress.bar
+  - pysam
+  - numpy
+  - pandas
+  - click
+
+  # R dependencies
+  - r-base=4.4
+  - r-ggplot2
+  - r-dplyr
+  - r-gridextra
+  - r-plyr
+  - r-labeling
+  - bioconductor-qvalue
