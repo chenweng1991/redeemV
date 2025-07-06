@@ -395,11 +395,11 @@ def generate_filenames(sample, bam_path=None, barcode_path=None):
     os.makedirs(sparse_dir, exist_ok=True)
     
     # Output files
-    out_genotypeTotal_file = f"{sparse_dir}/{sample}.RawGenotypes.Total"
-    out_genotypeVerySensitive_file = f"{sparse_dir}/{sample}.RawGenotypes.VerySensitive"
-    out_genotypeSensitive_file = f"{sparse_dir}/{sample}.RawGenotypes.Sensitive"
-    out_genotypeSpecific_file = f"{sparse_dir}/{sample}.RawGenotypes.Specific"
-    out_totalCts_file = f"{sparse_dir}/{sample}.QualifiedTotalCts"
+    out_genotypeTotal_file = f"{sparse_dir}/{sample}.ALT.RawGenotypes.Total"
+    out_genotypeVerySensitive_file = f"{sparse_dir}/{sample}.ALT.RawGenotypes.VerySensitive"
+    out_genotypeSensitive_file = f"{sparse_dir}/{sample}.ALT.RawGenotypes.Sensitive"
+    out_genotypeSpecific_file = f"{sparse_dir}/{sample}.ALT.RawGenotypes.Specific"
+    out_totalCts_file = f"{sparse_dir}/{sample}.ALT.QualifiedTotalCts"
 
     return [
         barcode_path,

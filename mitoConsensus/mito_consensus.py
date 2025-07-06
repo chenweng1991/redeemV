@@ -30,8 +30,10 @@ def build_molecule_dict(bam_file, barcode_tag):
     local_molecule_dict = defaultdict(list)
     
     # Populate local_read_pair_dict with read query names and their corresponding reads
+    with pysam.AlignmentFile(bam_file, "rb") as bam_input:
     for read in bam_input:
         local_read_pair_dict[read.query_name].append(read)
+
 
     # Populate local_molecule_dict based on the molecule information
     # (cell barcode and position) and the read query names
@@ -134,54 +136,118 @@ def generate_genotype_matrices(molecule_dict, read_pair_dict, bcs, mito_ref, Bas
                         Strand_mtx[base_1[1],int(read_pair_dict[read_pair][1].is_reverse)]+=1
                     else:
                         SG_Genotypes[base_1[1],4]+=1
-        for i in np.where(np.sum((SG_Genotypes+DB_Genotypes),axis=1)>0)[0]:
-            Cur_Genotype_array=(SG_Genotypes+DB_Genotypes)[i][0:4]
-            FamSize=sum(Cur_Genotype_array)
-            if FamSize>0:
-                CallIndex=Cur_Genotype_array.tolist().index(max(Cur_Genotype_array))
-                Call=dna_letters[CallIndex]
-                Ref=mito_ref["base"][i].upper()
-                Variant=str(i+1)+"_"+Ref+"_"+Call
-                GT_Cts=Cur_Genotype_array[CallIndex]
-                SG_Cts=SG_Genotypes[i][CallIndex]
-                DB_Cts=DB_Genotypes[i][CallIndex]
-                CSS=GT_Cts/FamSize
-                Strand=((Strand_mtx>0).astype(int))[i]
-                TotalMoleculeCtsMatrix[CellBC][i][0]+=1
-                OUT=m+"\t"+m.split("_")[0]+"\t"+str(i+1)+"\t"+Variant+"\t"+Call+"\t"+Ref+"\t"+str(FamSize)+"\t"+str(GT_Cts)+"\t"+str(CSS)+"\t"+str(DB_Cts)+"\t"+str(SG_Cts)+"\t"+str(Strand[0])+"\t"+str(Strand[1])+"\n" ## Note those matrix are 0-16568, therefore position ot i need to add 1 to match the 1-based corrdinates
-                if not Call==Ref:
-                    out_genotypeTotal.write(OUT)
-                if DB_Cts==0:
-                    if CSS>0.75 and FamSize>=2:  ##VerySensitive
-                        TotalMoleculeCtsMatrix[CellBC][i][1]+=1
-                        if not Call==Ref:
-                            out_genotypeVerySensitive.write(OUT)
-                    if CSS>0.75 and FamSize>=3:  ##Sensitive
-                        TotalMoleculeCtsMatrix[CellBC][i][2]+=1
-                        if not Call==Ref:
-                            out_genotypeSensitive.write(OUT)
-                    if CSS>0.9 and FamSize>=4:   ##Specific
-                        TotalMoleculeCtsMatrix[CellBC][i][3]+=1
-                        if not Call==Ref:
-                            out_genotypeSpecific.write(OUT)
-                else:
-                    if CSS>0.75 and FamSize>=1:  ##VerySensitive
-                        TotalMoleculeCtsMatrix[CellBC][i][1]+=1
-                        if not Call==Ref:
-                            out_genotypeVerySensitive.write(OUT)
-                    if CSS>0.75 and FamSize>=2:  ##Sensitive
-                        TotalMoleculeCtsMatrix[CellBC][i][2]+=1
-                        if not Call==Ref:
-                            out_genotypeSensitive.write(OUT)
-                    if CSS>0.9 and FamSize>=3:   ##Specific
-                        TotalMoleculeCtsMatrix[CellBC][i][3]+=1
-                        if not Call==Ref:
-                            out_genotypeSpecific.write(OUT)
+        buffer_total = []
+        buffer_very_sensitive = []
+        buffer_sensitive = []
+        buffer_specific = []
+        for i in np.where(np.sum((SG_Genotypes + DB_Genotypes), axis=1) > 0)[0]:
+            Cur_Genotype_array = (SG_Genotypes + DB_Genotypes)[i][0:4]
+            FamSize = sum(Cur_Genotype_array)
+            if FamSize > 0:
+                CallIndex = Cur_Genotype_array.tolist().index(max(Cur_Genotype_array))
+                Call = dna_letters[CallIndex]
+                Ref = mito_ref["base"][i].upper()
+                Variant = str(i + 1) + "_" + Ref + "_" + Call
+                GT_Cts = Cur_Genotype_array[CallIndex]
+                SG_Cts = SG_Genotypes[i][CallIndex]
+                DB_Cts = DB_Genotypes[i][CallIndex]
+                CSS = GT_Cts / FamSize
+                Strand = ((Strand_mtx > 0).astype(int))[i]
+                TotalMoleculeCtsMatrix[CellBC][i][0] += 1
+                OUT = (
+                    f"{m}\t{m.split('_')[0]}\t{i+1}\t{Variant}\t{Call}\t{Ref}\t{FamSize}\t"
+                    f"{GT_Cts}\t{CSS}\t{DB_Cts}\t{SG_Cts}\t{Strand[0]}\t{Strand[1]}\n"
+                )
 
+                if not Call == Ref:
+                    buffer_total.append(OUT)
+
+                if DB_Cts == 0:
+                    if CSS > 0.75 and FamSize >= 2:
+                        TotalMoleculeCtsMatrix[CellBC][i][1] += 1
+                        if not Call == Ref:
+                            buffer_very_sensitive.append(OUT)
+                    if CSS > 0.75 and FamSize >= 3:
+                        TotalMoleculeCtsMatrix[CellBC][i][2] += 1
+                        if not Call == Ref:
+                            buffer_sensitive.append(OUT)
+                    if CSS > 0.9 and FamSize >= 4:
+                        TotalMoleculeCtsMatrix[CellBC][i][3] += 1
+                        if not Call == Ref:
+                            buffer_specific.append(OUT)
+                else:
+                    if CSS > 0.75 and FamSize >= 1:
+                        TotalMoleculeCtsMatrix[CellBC][i][1] += 1
+                        if not Call == Ref:
+                            buffer_very_sensitive.append(OUT)
+                    if CSS > 0.75 and FamSize >= 2:
+                        TotalMoleculeCtsMatrix[CellBC][i][2] += 1
+                        if not Call == Ref:
+                            buffer_sensitive.append(OUT)
+                    if CSS > 0.9 and FamSize >= 3:
+                        TotalMoleculeCtsMatrix[CellBC][i][3] += 1
+                        if not Call == Ref:
+                            buffer_specific.append(OUT)
+
+    # Write all buffered data at once
+    out_genotypeTotal.writelines(buffer_total)
+    out_genotypeVerySensitive.writelines(buffer_very_sensitive)
+    out_genotypeSensitive.writelines(buffer_sensitive)
+    out_genotypeSpecific.writelines(buffer_specific)
+
+    # Close files
     out_genotypeTotal.close()
     out_genotypeVerySensitive.close()
     out_genotypeSensitive.close()
     out_genotypeSpecific.close()
+    #     for i in np.where(np.sum((SG_Genotypes+DB_Genotypes),axis=1)>0)[0]:
+    #         Cur_Genotype_array=(SG_Genotypes+DB_Genotypes)[i][0:4]
+    #         FamSize=sum(Cur_Genotype_array)
+    #         if FamSize>0:
+    #             CallIndex=Cur_Genotype_array.tolist().index(max(Cur_Genotype_array))
+    #             Call=dna_letters[CallIndex]
+    #             Ref=mito_ref["base"][i].upper()
+    #             Variant=str(i+1)+"_"+Ref+"_"+Call
+    #             GT_Cts=Cur_Genotype_array[CallIndex]
+    #             SG_Cts=SG_Genotypes[i][CallIndex]
+    #             DB_Cts=DB_Genotypes[i][CallIndex]
+    #             CSS=GT_Cts/FamSize
+    #             Strand=((Strand_mtx>0).astype(int))[i]
+    #             TotalMoleculeCtsMatrix[CellBC][i][0]+=1
+    #             OUT=m+"\t"+m.split("_")[0]+"\t"+str(i+1)+"\t"+Variant+"\t"+Call+"\t"+Ref+"\t"+str(FamSize)+"\t"+str(GT_Cts)+"\t"+str(CSS)+"\t"+str(DB_Cts)+"\t"+str(SG_Cts)+"\t"+str(Strand[0])+"\t"+str(Strand[1])+"\n" ## Note those matrix are 0-16568, therefore position ot i need to add 1 to match the 1-based corrdinates
+    #             if not Call==Ref:
+    #                 out_genotypeTotal.write(OUT)
+    #             if DB_Cts==0:
+    #                 if CSS>0.75 and FamSize>=2:  ##VerySensitive
+    #                     TotalMoleculeCtsMatrix[CellBC][i][1]+=1
+    #                     if not Call==Ref:
+    #                         out_genotypeVerySensitive.write(OUT)
+    #                 if CSS>0.75 and FamSize>=3:  ##Sensitive
+    #                     TotalMoleculeCtsMatrix[CellBC][i][2]+=1
+    #                     if not Call==Ref:
+    #                         out_genotypeSensitive.write(OUT)
+    #                 if CSS>0.9 and FamSize>=4:   ##Specific
+    #                     TotalMoleculeCtsMatrix[CellBC][i][3]+=1
+    #                     if not Call==Ref:
+    #                         out_genotypeSpecific.write(OUT)
+    #             else:
+    #                 if CSS>0.75 and FamSize>=1:  ##VerySensitive
+    #                     TotalMoleculeCtsMatrix[CellBC][i][1]+=1
+    #                     if not Call==Ref:
+    #                         out_genotypeVerySensitive.write(OUT)
+    #                 if CSS>0.75 and FamSize>=2:  ##Sensitive
+    #                     TotalMoleculeCtsMatrix[CellBC][i][2]+=1
+    #                     if not Call==Ref:
+    #                         out_genotypeSensitive.write(OUT)
+    #                 if CSS>0.9 and FamSize>=3:   ##Specific
+    #                     TotalMoleculeCtsMatrix[CellBC][i][3]+=1
+    #                     if not Call==Ref:
+    #                         out_genotypeSpecific.write(OUT)
+
+    # out_genotypeTotal.close()
+    # out_genotypeVerySensitive.close()
+    # out_genotypeSensitive.close()
+    # out_genotypeSpecific.close()
     ######### Print out the qualified total counts, aka qualified depth
     with open(out_totalCts_file,"w") as out_totalCts:
         for Cell in TotalMoleculeCtsMatrix.keys():

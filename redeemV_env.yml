@@ -10,6 +10,9 @@ dependencies:
   - bowtie2
   - samtools
   - bedtools
+  - bioconda::seqkit
+  - bioconda::bwa-mem2
+
   
   # Python package dependencies
   - pip

@@ -230,16 +230,17 @@ else
 fi
 
 
-### Step 7C: Filter remapped reads, shift genome back, and cleanup ###
-if [ ! -s "$name.reshifted.alt_mito_mapped_uniqmapped.bam" ]; then
+# UPDATED - DON'T SHIFT BACK READS, KEEP SEPARATE
+### Step 7C: Filter remapped reads, by quality and chrM 
+if [ ! -s "${name}.alt_mito_mapped_uniqmapped.bam" ]; then
  echo "Running step 7C: Filtering remapped reads..."
-samtools view -@ $CORE -bf 2 -q30 \
+samtools view -@ $CORE -bf 2 -q30  \
   -U ${name}.alt_mito_filtered_OUT.bam \
-  ${name}_remapped.bam > ${name}.alt_mito_mapped_uniqmapped.bam
+  ${name}_remapped.bam chrM > ${name}.alt_mito_mapped_uniqmapped.bam
 
  samtools index -@ $CORE ${name}.alt_mito_mapped_uniqmapped.bam
 
- python3 $MyMultiome/revert_mito_shift.py ${name}.alt_mito_mapped_uniqmapped.bam ${name}.reshifted.alt_mito_mapped_uniqmapped.bam
+#  python3 $MyMultiome/revert_mito_shift.py ${name}.alt_mito_mapped_uniqmapped.bam ${name}.reshifted.alt_mito_mapped_uniqmapped.bam
 
 
 
@@ -250,46 +251,49 @@ else
  echo "$name.alt_mito_mapped_uniqmapped.bam exists. Skip Step 7C."
 fi
 
+#UPDATED TO USE THE UNSHIFTED
 #Step7D Extract cell barcode for alt 
 if [ ! -s "$name.alt_mito_mapped_uniqmapped.tagged.bam" ]; then
   echo "Running step 7D Extract cell barcode..."
-  python3 $MyMultiome/AddBC2BAM.py ${name}.reshifted.alt_mito_mapped_uniqmapped.bam ${name}.reshifted.alt_mito_mapped_uniqmapped.tagged.bam
+  python3 $MyMultiome/AddBC2BAM.py ${name}.alt_mito_mapped_uniqmapped.bam ${name}.alt_mito_mapped_uniqmapped.tagged.bam
 else
-  echo "${name}.reshifted.alt_mito_mapped_uniqmapped.tagged.bam exist. Skip Step 7D."
+  echo "$name.alt_mito_mapped_uniqmapped.tagged.bam exist. Skip Step 7D."
 fi
 
-#Step8 make output version that is combined 
-if [ ! -s "${name}.merged_with_shifted_mito.sorted.bam" ]; then
-  echo "Running step 8 combine bams..."
 
-    # For shifted BAM
-  samtools addreplacerg \
-    -r "ID:shifted" \
-    -o "${name}.shifted.tmp.bam" \
-    "${name}.reshifted.alt_mito_mapped_uniqmapped.tagged.bam"
-  mv "${name}.shifted.tmp.bam" "${name}.reshifted.alt_mito_mapped_uniqmapped.tagged.bam"
+# DONT MERGE COMMENT THIS PART OUT
+# #Step8 make output version that is combined 
+# if [ ! -s "${name}.merged_with_shifted_mito.sorted.bam" ]; then
+#   echo "Running step 8 combine bams..."
 
-
-
-  # Merge
-  samtools merge -f "${name}.merged_with_shifted_mito.bam" \
-    "${name}.reshifted.alt_mito_mapped_uniqmapped.tagged.bam" \
-    "${name}.uniqmapped.mito.bam"
-
-  # Sort
-  samtools sort -o "${name}.merged_with_shifted_mito.sorted.bam" \
-    "${name}.merged_with_shifted_mito.bam"
-
-  # Index
-  samtools index "${name}.merged_with_shifted_mito.sorted.bam"
+#     # For shifted BAM
+#   samtools addreplacerg \
+#     -r "ID:shifted" \
+#     -o "${name}.shifted.tmp.bam" \
+#     "${name}.reshifted.alt_mito_mapped_uniqmapped.tagged.bam"
+#   mv "${name}.shifted.tmp.bam" "${name}.reshifted.alt_mito_mapped_uniqmapped.tagged.bam"
 
 
 
+#   # Merge
+#   samtools merge -f "${name}.merged_with_shifted_mito.bam" \
+#     "${name}.reshifted.alt_mito_mapped_uniqmapped.tagged.bam" \
+#     "${name}.uniqmapped.mito.bam"
 
-else
-  echo "${name}.reshifted.alt_mito_mapped_uniqmapped.tagged.bam Skip step 8."
+#   # Sort
+#   samtools sort -o "${name}.merged_with_shifted_mito.sorted.bam" \
+#     "${name}.merged_with_shifted_mito.bam"
 
-fi
+#   # Index
+#   samtools index "${name}.merged_with_shifted_mito.sorted.bam"
+
+
+
+
+# else
+#   echo "${name}.reshifted.alt_mito_mapped_uniqmapped.tagged.bam Skip step 8."
+
+# fi
 
 # ### Step 8: alternate mito mapping to only mitochondrial reference
 # if [ ! -s "$name.mito_ONLY_mapped.bam" ]; then

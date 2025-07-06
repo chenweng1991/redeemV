@@ -13,7 +13,10 @@ Sensitive_o_file=Sensitive+".StrandBalance"
 Specific_o_file=Specific+".StrandBalance"
 
 StrandBiasDic=[]
+
 with open(StrandBiaseBlackList_file) as f:
+    header = f.readline()  # Read and discard the header
+
     for line in f:
         StrandBiasDic.append(line.strip())
 
@@ -27,6 +30,7 @@ Specific_o=open(Specific_o_file,"w")
 
 ##
 with open(Total) as f:
+    header = f.readline()  # Read and discard the header
     for line in f:
         content=line.strip().split()
         V=content[3]
@@ -41,6 +45,8 @@ Total_o.close()
 
 ##
 with open(VerySensitive) as f:
+    header = f.readline()  # Read and discard the header
+
     for line in f:
         content=line.strip().split()
         V=content[3]
@@ -56,6 +62,8 @@ Total_o.close()
 
 ##
 with open(Sensitive) as f:
+    header = f.readline()  # Read and discard the header
+
     for line in f:
         content=line.strip().split()
         V=content[3]
@@ -71,6 +79,8 @@ Total_o.close()
 
 ##
 with open(Specific) as f:
+    header = f.readline()  # Read and discard the header
+
     for line in f:
         content=line.strip().split()
         V=content[3]

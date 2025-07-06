@@ -11,22 +11,22 @@ import math
 import pysam
 
 def string_hamming_distance(str1, str2):
-    """
-    Fast hamming distance over 2 strings known to be of same length.
-    In information theory, the Hamming distance between two strings of equal 
-    length is the number of positions at which the corresponding symbols 
-    are different.
-    eg "karolin" and "kathrin" is 3.
-    """
-    return sum(itertools.imap(operator.ne, str1, str2))
+	"""
+	Fast hamming distance over 2 strings known to be of same length.
+	In information theory, the Hamming distance between two strings of equal 
+	length is the number of positions at which the corresponding symbols 
+	are different.
+	eg "karolin" and "kathrin" is 3.
+	"""
+	return sum(itertools.imap(operator.ne, str1, str2))
 
 
 def rev_comp(seq):
-    """
-    Fast Reverse Compliment
-    """  
-    tbl = {'A':'T', 'T':'A', 'C':'G', 'G':'C', 'N':'N'}
-    return ''.join(tbl[s] for s in seq[::-1])
+	"""
+	Fast Reverse Compliment
+	"""  
+	tbl = {'A':'T', 'T':'A', 'C':'G', 'G':'C', 'N':'N'}
+	return ''.join(tbl[s] for s in seq[::-1])
 
 def gettime(): 
 	"""
@@ -81,9 +81,9 @@ def verify_bai(bamfile):
 		pysam.index(bamfile)
 
 # Helper function for chunking the bam
-def split_chunk_file(one_barcode_file, script_dir, input, bcbd, barcode_tag, mito_chr):
-	chunk_bam_py = script_dir + "/bin/python/chunk_barcoded_bam.py"
-	pycall = " ".join(['python', chunk_bam_py, input, bcbd, barcode_tag, one_barcode_file, mito_chr])
+def split_chunk_file(barcode_file, script_dir, input, bcbd, barcode_tag, mito_chr, prefix=''):
+	chunk_bam_py = script_dir + "/bin/python/chunk_barcoded_bam_single_core_efficient.py" # TESTING MP 3/8/25
+	pycall = " ".join(['python', chunk_bam_py, input, bcbd, barcode_tag, barcode_file, mito_chr,prefix])
 	os.system(pycall)
 
 def verify_sample_mitobam(bam, mito_chr, mito_length):
@@ -103,11 +103,9 @@ def verify_sample_mitobam(bam, mito_chr, mito_length):
 	return(bam_length == mito_length and nReads > 0)
 
 
-def handle_fasta_inference(mito_genome, supported_genomes, script_dir, mode, of, write_files = True):
-	"""
-	Determines what's going on with the mitochondrial genome
-	based on user input / existing data
-	"""
+def handle_fasta_inference(mito_genome, supported_genomes, script_dir, mode, of, write_files=True):
+	
+ 
 	if any(mito_genome in s for s in supported_genomes):
 		fastaf = script_dir + "/bin/anno/fasta/" + mito_genome + ".fasta"
 	else:
@@ -115,45 +113,45 @@ def handle_fasta_inference(mito_genome, supported_genomes, script_dir, mode, of,
 			fastaf = mito_genome
 		else:
 			sys.exit('ERROR: Could not find file ' + mito_genome + '; QUITTING')
-	fasta = parse_fasta(fastaf)	
+	fasta = parse_fasta(fastaf)
 
-	if(len(fasta.keys()) != 1):
+	if len(fasta.keys()) != 1:
 		sys.exit('ERROR: .fasta file has multiple chromosomes; supply file with only 1; QUITTING')
-	
-	mito_genome, mito_seq = list(fasta.items())[0]
+
+	full_header, mito_seq = list(fasta.items())[0]
+	contig_name = full_header.split()[0]
+	mito_genome = contig_name
 	mito_length = len(mito_seq)
-	
-	if(write_files):
+
+
+	if write_files:
 		make_folder(of + "/fasta/")
 		make_folder(of + "/final/")
-	
+
 	newfastaf = of + "/fasta/" + mito_genome + ".fasta"
-	
-	# Need a special logic to potentially over-write the existing 
+
+	# Need a special logic to potentially over-write the existing
 	# mito fasta file if they wind up not being the same from guess/checking hg19
 	writeFA = False
 	if os.path.exists(newfastaf):
-		if filecmp.cmp(fastaf, newfastaf,shallow=False):
-			pass
-		else:
+		if not filecmp.cmp(fastaf, newfastaf, shallow=False):
 			writeFA = True
 	else:
 		writeFA = True
-		
+
 	if writeFA and write_files:
-			
 		shutil.copyfile(fastaf, newfastaf)
 		fastaf = newfastaf
 		pysam.faidx(fastaf)
-	
+
 		with open(of + "/final/" + mito_genome + "_refAllele.txt", 'w') as f:
 			b = 1
 			for base in mito_seq:
 				f.write(str(b) + "\t" + base + "\n")
 				b += 1
-			f.close()
-	return(fastaf, mito_genome, mito_length)
-	
+
+	return fastaf, mito_genome, mito_length
+
 
 def make_folder(folder):
 	"""
@@ -163,11 +161,65 @@ def make_folder(folder):
 		os.makedirs(folder)
 
 def file_len(fname):
-    with open(fname) as f:
-        for i, l in enumerate(f):
-            pass
-    return i + 1
-
+	with open(fname) as f:
+		for i, l in enumerate(f):
+			pass
+	return i + 1
+def split_barcodes_file_new(barcode_file, n_per_file, output):
+	"""
+	Function to split a barcode file into multiple files, each containing
+	n_per_file barcodes (except possibly the last file which may contain fewer)
+	
+	Parameters:
+	-----------
+	barcode_file : str
+		Path to the barcode file to split
+	n_per_file : int
+		Number of barcodes to include in each split file
+	output : str
+		Output directory path
+	
+	Returns:
+	--------
+	list
+		List of paths to the split barcode files
+	"""
+	n_samples_observed = file_len(barcode_file)
+	
+	# If n_per_file is 0 or greater than total samples, just return the original file
+	if n_per_file <= 0 or n_samples_observed <= n_per_file:
+		return [barcode_file]
+	else:
+		# Calculate how many files we'll need
+		total_files = math.ceil(n_samples_observed / n_per_file)
+		
+		# Set up output folder
+		full_output_folder = output + "/temp" + "/barcode_files"
+		make_folder(full_output_folder)
+		
+		smallfile = None
+		counter = 0
+		line_counter = 0
+		
+		with open(barcode_file) as bigfile:
+			for line in bigfile:
+				# Start a new file when needed
+				if line_counter % n_per_file == 0:
+					if smallfile:
+						smallfile.close()
+					counter += 1
+					small_filename = full_output_folder + "/barcodes." + str(counter) + ".txt" 
+					smallfile = open(small_filename, "w")
+				
+				smallfile.write(line)
+				line_counter += 1
+				
+		if smallfile:
+			smallfile.close()
+			
+		barcodes_files = [full_output_folder + "/barcodes." + str(x) + ".txt" 
+						 for x in range(1, total_files + 1)]
+		return barcodes_files
 def split_barcodes_file(barcode_file, nsamples, output):
 	"""
 	Function to only make a given folder if it does not already exist
@@ -205,115 +257,115 @@ def split_barcodes_file(barcode_file, nsamples, output):
 
 # https://stackoverflow.com/questions/1006289/how-to-find-out-the-number-of-cpus-using-python	
 def available_cpu_count():
-    """
-    Number of available virtual or physical CPUs on this system, i.e.
-    user/real as output by time(1) when called with an optimally scaling
-    userspace-only program
 	"""
-    # cpuset
-    # cpuset may restrict the number of *available* processors
-    try:
-        m = re.search(r'(?m)^Cpus_allowed:\s*(.*)$',
-                      open('/proc/self/status').read())
-        if m:
-            res = bin(int(m.group(1).replace(',', ''), 16)).count('1')
-            if res > 0:
-                return res
-    except IOError:
-        pass
+	Number of available virtual or physical CPUs on this system, i.e.
+	user/real as output by time(1) when called with an optimally scaling
+	userspace-only program
+	"""
+	# cpuset
+	# cpuset may restrict the number of *available* processors
+	try:
+		m = re.search(r'(?m)^Cpus_allowed:\s*(.*)$',
+					  open('/proc/self/status').read())
+		if m:
+			res = bin(int(m.group(1).replace(',', ''), 16)).count('1')
+			if res > 0:
+				return res
+	except IOError:
+		pass
 
-    # Python 2.6+
-    try:
-        import multiprocessing
-        return multiprocessing.cpu_count()
-    except (ImportError, NotImplementedError):
-        pass
+	# Python 2.6+
+	try:
+		import multiprocessing
+		return multiprocessing.cpu_count()
+	except (ImportError, NotImplementedError):
+		pass
 
-    # http://code.google.com/p/psutil/
-    try:
-        import psutil
-        return psutil.cpu_count()   # psutil.NUM_CPUS on old versions
-    except (ImportError, AttributeError):
-        pass
+	# http://code.google.com/p/psutil/
+	try:
+		import psutil
+		return psutil.cpu_count()   # psutil.NUM_CPUS on old versions
+	except (ImportError, AttributeError):
+		pass
 
-    # POSIX
-    try:
-        res = int(os.sysconf('SC_NPROCESSORS_ONLN'))
+	# POSIX
+	try:
+		res = int(os.sysconf('SC_NPROCESSORS_ONLN'))
 
-        if res > 0:
-            return res
-    except (AttributeError, ValueError):
-        pass
+		if res > 0:
+			return res
+	except (AttributeError, ValueError):
+		pass
 
-    # Windows
-    try:
-        res = int(os.environ['NUMBER_OF_PROCESSORS'])
+	# Windows
+	try:
+		res = int(os.environ['NUMBER_OF_PROCESSORS'])
 
-        if res > 0:
-            return res
-    except (KeyError, ValueError):
-        pass
+		if res > 0:
+			return res
+	except (KeyError, ValueError):
+		pass
 
-    # jython
-    try:
-        from java.lang import Runtime
-        runtime = Runtime.getRuntime()
-        res = runtime.availableProcessors()
-        if res > 0:
-            return res
-    except ImportError:
-        pass
+	# jython
+	try:
+		from java.lang import Runtime
+		runtime = Runtime.getRuntime()
+		res = runtime.availableProcessors()
+		if res > 0:
+			return res
+	except ImportError:
+		pass
 
-    # BSD
-    try:
-        sysctl = subprocess.Popen(['sysctl', '-n', 'hw.ncpu'],
-                                  stdout=subprocess.PIPE)
-        scStdout = sysctl.communicate()[0]
-        res = int(scStdout)
+	# BSD
+	try:
+		sysctl = subprocess.Popen(['sysctl', '-n', 'hw.ncpu'],
+								  stdout=subprocess.PIPE)
+		scStdout = sysctl.communicate()[0]
+		res = int(scStdout)
 
-        if res > 0:
-            return res
-    except (OSError, ValueError):
-        pass
+		if res > 0:
+			return res
+	except (OSError, ValueError):
+		pass
 
-    # Linux
-    try:
-        res = open('/proc/cpuinfo').read().count('processor\t:')
+	# Linux
+	try:
+		res = open('/proc/cpuinfo').read().count('processor\t:')
 
-        if res > 0:
-            return res
-    except IOError:
-        pass
+		if res > 0:
+			return res
+	except IOError:
+		pass
 
-    # Solaris
-    try:
-        pseudoDevices = os.listdir('/devices/pseudo/')
-        res = 0
-        for pd in pseudoDevices:
-            if re.match(r'^cpuid@[0-9]+$', pd):
-                res += 1
+	# Solaris
+	try:
+		pseudoDevices = os.listdir('/devices/pseudo/')
+		res = 0
+		for pd in pseudoDevices:
+			if re.match(r'^cpuid@[0-9]+$', pd):
+				res += 1
 
-        if res > 0:
-            return res
-    except OSError:
-        pass
+		if res > 0:
+			return res
+	except OSError:
+		pass
 
-    # Other UNIXes (heuristic)
-    try:
-        try:
-            dmesg = open('/var/run/dmesg.boot').read()
-        except IOError:
-            dmesgProcess = subprocess.Popen(['dmesg'], stdout=subprocess.PIPE)
-            dmesg = dmesgProcess.communicate()[0]
+	# Other UNIXes (heuristic)
+	try:
+		try:
+			dmesg = open('/var/run/dmesg.boot').read()
+		except IOError:
+			dmesgProcess = subprocess.Popen(['dmesg'], stdout=subprocess.PIPE)
+			dmesg = dmesgProcess.communicate()[0]
 
-        res = 0
-        while '\ncpu' + str(res) + ':' in dmesg:
-            res += 1
+		res = 0
+		while '\ncpu' + str(res) + ':' in dmesg:
+			res += 1
 
-        if res > 0:
-            return res
-    except OSError:
-        pass
+		if res > 0:
+			return res
+	except OSError:
+		pass
 
-    raise Exception('Can not determine number of CPUs on this system')
-    
+	raise Exception('Can not determine number of CPUs on this system')
+	

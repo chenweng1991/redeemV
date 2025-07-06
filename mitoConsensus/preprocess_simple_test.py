@@ -57,7 +57,9 @@ def process_bam_single_pass(input_bam, barcode_files, output_dir, barcode_tag, m
     
     with pysam.AlignmentFile(input_bam, "rb") as infile:
         # Step 3: Process reads and write to appropriate files
-        for read in infile.fetch(str(mito_chr), multiple_iterators=True):
+        contig = mito_chr.split()[0]
+
+        for read in infile.fetch(contig, multiple_iterators=True):
             try:
                 bc = read.get_tag(barcode_tag)
                 if bc in barcode_to_file:
