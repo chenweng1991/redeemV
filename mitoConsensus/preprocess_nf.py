@@ -135,7 +135,8 @@ def preprocess(input, ncores, files_per_core, barcodes, output, mito_genome, bar
     print(f"DEBUG: barcodes_per_splits: {n_per_file}")
     print(f"DEBUG: Estimated barcode file length: {file_len(barcodes)}")
     print(f"DEBUG: Chunk size for splitting: {math.ceil(file_len(barcodes)/file_number)}")
-    barcode_files = split_barcodes_file_new(barcodes, n_per_file, output)
+    barcode_files = split_barcodes_file_new(barcodes, file_number, output)
+
     print(f"DEBUG: Generated barcode files: {barcode_files}")
 
     # Add this line after the debug statement for script_dir

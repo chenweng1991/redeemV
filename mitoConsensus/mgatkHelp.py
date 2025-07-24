@@ -165,61 +165,94 @@ def file_len(fname):
 		for i, l in enumerate(f):
 			pass
 	return i + 1
-def split_barcodes_file_new(barcode_file, n_per_file, output):
-	"""
-	Function to split a barcode file into multiple files, each containing
-	n_per_file barcodes (except possibly the last file which may contain fewer)
+
+def split_barcodes_file_new(barcode_file, n_files, output):
+    """
+    Split `barcode_file` into exactly `n_files` pieces.
+    The first (N % n_files) files have ⌈N / n_files⌉ lines,
+    the rest have ⌊N / n_files⌋  lines – never empty.
+    Returns the list of paths.
+    """
+    # read all barcodes once
+    with open(barcode_file) as fh:
+        barcodes = [l.strip() for l in fh if l.strip()]
+
+    N          = len(barcodes)
+    base       = N // n_files            # minimum per file
+    extra      = N %  n_files            # first `extra` files get +1
+    out_root   = f"{output}/temp/barcode_files"
+    make_folder(out_root)
+
+    paths = []
+    idx   = 0
+    for i in range(1, n_files + 1):
+        take = base + (1 if i <= extra else 0)
+        chunk = barcodes[idx : idx + take]
+        idx  += take
+
+        out_path = f"{out_root}/barcodes.{i}.txt"
+        with open(out_path, "w") as out:
+            out.write("\n".join(chunk) + ("\n" if chunk else ""))
+        paths.append(out_path)
+
+    return paths
+
+### OLD VERSION THAT FAILED ON MODULO 0 (?)
+# def split_barcodes_file_new(barcode_file, n_per_file, output):
+# 	"""
+# 	Function to split a barcode file into multiple files, each containing
+# 	n_per_file barcodes (except possibly the last file which may contain fewer)
 	
-	Parameters:
-	-----------
-	barcode_file : str
-		Path to the barcode file to split
-	n_per_file : int
-		Number of barcodes to include in each split file
-	output : str
-		Output directory path
+# 	Parameters:
+# 	-----------
+# 	barcode_file : str
+# 		Path to the barcode file to split
+# 	n_per_file : int
+# 		Number of barcodes to include in each split file
+# 	output : str
+# 		Output directory path
 	
-	Returns:
-	--------
-	list
-		List of paths to the split barcode files
-	"""
-	n_samples_observed = file_len(barcode_file)
+# 	Returns:
+# 	--------
+# 	list
+# 		List of paths to the split barcode files
+# 	"""
+# 	n_samples_observed = file_len(barcode_file)
 	
-	# If n_per_file is 0 or greater than total samples, just return the original file
-	if n_per_file <= 0 or n_samples_observed <= n_per_file:
-		return [barcode_file]
-	else:
-		# Calculate how many files we'll need
-		total_files = math.ceil(n_samples_observed / n_per_file)
+# 	# If n_per_file is 0 or greater than total samples, just return the original file
+# 	if n_per_file <= 0 or n_samples_observed <= n_per_file:
+# 		return [barcode_file]
+# 	else:
+# 		# Calculate how many files we'll need
+# 		total_files = math.ceil(n_samples_observed / n_per_file)
 		
-		# Set up output folder
-		full_output_folder = output + "/temp" + "/barcode_files"
-		make_folder(full_output_folder)
+# 		# Set up output folder
+# 		full_output_folder = output + "/temp" + "/barcode_files"
+# 		make_folder(full_output_folder)
 		
-		smallfile = None
-		counter = 0
-		line_counter = 0
+# 		smallfile = None
+# 		counter = 0
+# 		line_counter = 0
 		
-		with open(barcode_file) as bigfile:
-			for line in bigfile:
-				# Start a new file when needed
-				if line_counter % n_per_file == 0:
-					if smallfile:
-						smallfile.close()
-					counter += 1
-					small_filename = full_output_folder + "/barcodes." + str(counter) + ".txt" 
-					smallfile = open(small_filename, "w")
+# 		with open(barcode_file) as bigfile:
+# 			for line in bigfile:
+# 				# Start a new file when needed
+# 				if line_counter % n_per_file == 0:
+# 					if smallfile:
+# 						smallfile.close()
+# 					counter += 1
+# 					small_filename = full_output_folder + "/barcodes." + str(counter) + ".txt" 
+# 					smallfile = open(small_filename, "w")
 				
-				smallfile.write(line)
-				line_counter += 1
+# 				smallfile.write(line)
+# 				line_counter += 1
 				
-		if smallfile:
-			smallfile.close()
+# 		if smallfile:
+# 			smallfile.close()
 			
-		barcodes_files = [full_output_folder + "/barcodes." + str(x) + ".txt" 
-						 for x in range(1, total_files + 1)]
-		return barcodes_files
+# 		barcodes_files = [full_output_folder + "/barcodes." + str(x) + ".txt" 
+# 						 for x in range(1, total_files + 1)]
+# 		return barcodes_files
 def split_barcodes_file(barcode_file, nsamples, output):
 	"""
 	Function to only make a given folder if it does not already exist
