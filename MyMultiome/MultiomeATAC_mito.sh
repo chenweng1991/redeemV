@@ -9,7 +9,7 @@ Help()
   echo "This script trim and map the mtDNA fastqs, generating uniqmapped bam and QC plots "
   echo
   echo "MultiomeATAC_mito.sh -h for this page"
-  echo "Syntax: MultiomeATAC_mito.sh -n -1 -2 -i -c -t -m -b"
+  echo "Syntax: MultiomeATAC_mito.sh -n -1 -2 -i -c -t -m -b [-w barcode_whitelist]"
   echo "Options"
   echo "-n name: The prefix of all analyzed files"
   echo "-1 Read1: Read1 of fastq file (150nt is recommended)"
@@ -19,13 +19,15 @@ Help()
   echo "-t CORE: The number of cores to use"
   echo "-m MyMultiome:The path to the folder of MyMultiome"
   echo "-b bowtie2Index: the bowtie2 index path/prefix"
+  echo "-w BarcodeWhitelist: optional ATAC whitelist used to validate barcode extraction"
   echo "-q quick, defult is false, if true then exit after uniqmapped.mito.bam, skipping QC step"
   echo "-p premap, default is false, if true then exit after mapping."
 }
 
 quick=0
 premap=0
-while getopts "hn:1:2:i:c:t:m:b:q:p" option; do
+BarcodeWhitelist=""
+while getopts "hn:1:2:i:c:t:m:b:w:q:p" option; do
   case $option in
     h) # display help
         Help
@@ -46,6 +48,8 @@ while getopts "hn:1:2:i:c:t:m:b:q:p" option; do
         MyMultiome=$OPTARG;;
     b) # The bowtie2 index path/prefix
         bowtie2Index=$OPTARG;;
+    w) # Optional whitelist for barcode extraction validation
+        BarcodeWhitelist=$OPTARG;;
     q) # if use this option then exit after uniqmapped.mito.bam, skipping QC step
         quick=1;;
     p) # If use this option then exit after mapping, skipping the rest. 
@@ -75,7 +79,11 @@ fi
 ##Step 2 Add cell barcode to the readname
 if [ ! -f "$Read1.trim.BC" ]; then
   echo "Running step 2 Add cell barcode to the readname..."
-  python3 $MyMultiome/AddBC2Fastq.py $Read1.trim $Read2.trim $ReadBarcode $Read1.trim.BC $Read2.trim.BC
+  addbc_args=()
+  if [ -n "$BarcodeWhitelist" ]; then
+    addbc_args+=(--whitelist "$BarcodeWhitelist")
+  fi
+  python3 $MyMultiome/AddBC2Fastq.py $Read1.trim $Read2.trim $ReadBarcode $Read1.trim.BC $Read2.trim.BC "${addbc_args[@]}"
 else
   echo "$Read1.trim.BC and $Read2.trim.BC exist. Skip Step 2."
 fi
@@ -101,7 +109,7 @@ if [[ premap -eq 1 ]]
 fi
 
 #Step4 Extract cell barcode
-if [ ! -f "$name.bam" ]; then
+if [ ! -f "$name.tagged.bam" ]; then
   echo "Running step 4 Extract cell barcode..."
   python3 $MyMultiome/AddBC2BAM.py $name.bam $name.tagged.bam
 else
