@@ -39,5 +39,5 @@ bcsmulti = bcsmulti['multi'].tolist()
 ####define 10x barcodes whitelist
 bcs10x = pd.read_csv(bc10xfile,sep='\t',header=None)
 bcs10x = bcs10x[0].tolist()
-fig=pymulti.pymulti(R1,R2,bcsmulti,bcs10x,len_10x=len_10x,len_multi=len_multi,len_umi=len_umi,split=True,hamming=True,med_factor=1,median_only=True,sampname=lib10x)
+fig=pymulti.pymulti(R1,R2,bcsmulti,bcs10x,len_10x=len_10x,len_multi=len_multi,len_umi=len_umi,split=True,hamming=True,med_factor=1,median_only=True,sampname=lib10x,use_5prime=True)
 fig.savefig("plot.pdf")

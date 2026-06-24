@@ -3,7 +3,7 @@
 Module pymulti
 """
 
-__author__ = "Johnny Yu"
+__author__ = "Johnny Yu, Chen Weng"
 __version__ = "0.1.0"
 __license__ = "MIT"
 
@@ -24,7 +24,8 @@ import numpy as np
 import seaborn as sns
 from scipy.stats import zscore
 from scipy.stats import norm
-from sklearn.neighbors import DistanceMetric
+# from sklearn.neighbors import DistanceMetric
+from sklearn.metrics import DistanceMetric
 import datetime
 from scipy.spatial.distance import hamming
 import gzip
@@ -57,7 +58,22 @@ def split_rawdata(R1,R2,len_10x,len_umi,len_multi,sampname,huge):
     ###regular pickle dump
         pickle.dump(reads, open('pymulti/'+sampname+"_reads.p", "wb" ) )
         return(reads)
-    
+
+def split_rawdata_5prime(R1,R2,len_10x,len_umi,len_multi,sampname,huge):
+    """Read 5-prime hashing FASTQs and extract the MULTI-seq barcode from R2."""
+    reads = []
+    with gzip.open(R1, "rt") as F1, gzip.open(R2, "rt") as F2:
+        for record1, record2 in zip(SeqIO.parse(F1, "fastq"), SeqIO.parse(F2, "fastq")):
+            bc_10x = str(record1.seq[:len_10x])
+            umi = str(record1.seq[len_10x:(len_10x+len_umi)])
+            r2 = str(record2.seq[10:(10+len_multi)])
+            reads.append([bc_10x, umi, r2])
+    if huge == True:
+        print('file is huge. not saving.')
+        return(reads)
+    pickle.dump(reads, open('pymulti/'+sampname+"_reads.p", "wb" ) )
+    return(reads)
+
 def read_pickle(sampname,reads,huge):
     """ this reads in the pickle data written from split_rawdata """
     if huge == True:
@@ -286,7 +302,7 @@ def correct_median(filtd,sampname,med_factor,plots=True):
 #####################
 
 def pymulti(R1,R2,bcsmulti,bcs10x,len_10x=16,len_umi=12,len_multi=8,med_factor=1.8,sampname='pymulti_',
-            split=True,plots=True,hamming=False,thresh=False,pct_only=False,median_only=False,huge=False,thresh_dict={}):
+            split=True,plots=True,hamming=False,thresh=False,pct_only=False,median_only=False,huge=False,thresh_dict={},use_5prime=False):
     """ main loop, splits from fastqs and runs through cell calls 
         R1 = your Read1 fastq for the multiseq/hashing fraction
         R2 = your Read2 fastq for the multiseq/hashing fraction
@@ -308,9 +324,16 @@ def pymulti(R1,R2,bcsmulti,bcs10x,len_10x=16,len_umi=12,len_multi=8,med_factor=1
     ###
     if huge == True: print('assuming huge fastqs.')
     ###split fastqs and pickle
-    os.system('mkdir pymulti')
-    if split == True: 
-        reads = split_rawdata(R1,R2,len_10x,len_umi,len_multi,sampname,huge=huge)
+    os.makedirs('pymulti', exist_ok=True)
+    if split:
+        if use_5prime:
+            reads = split_rawdata_5prime(
+                R1, R2, len_10x, len_umi, len_multi, sampname, huge=huge
+            )
+        else:
+            reads = split_rawdata(
+                R1, R2, len_10x, len_umi, len_multi, sampname, huge=huge
+            )
     else:
         reads = None
     ###read in old pickle data
@@ -331,4 +354,3 @@ def pymulti(R1,R2,bcsmulti,bcs10x,len_10x=16,len_umi=12,len_multi=8,med_factor=1
     else:
         correct_simple(filtd,sampname,plots,thresh,pct_only,thresh_dict)
     return(fig)
-    

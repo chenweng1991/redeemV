@@ -16,35 +16,34 @@ Usage:
 import argparse
 
 def process_bed_file(bed_filename, out_filename, Cutoff):
-    with open(bed_filename) as f:
-        line1 = f.readline().strip().split()
-        CellBC, Chr, Start, End = line1[:4]
-        PCR = 1
-        
-        with open(out_filename, "w") as f_cut_file:
-            Container=[[Chr,Start,End,CellBC,PCR]]
-            for line in f:
-                Cur_CellBC, Cur_Chr, Cur_Start, Cur_End, =line.strip().split()[:4]
-                Cur_PCR=1
-                if Cur_CellBC==CellBC:
-                    if Cur_Chr==Chr and Cur_Start==Start and Cur_End==End:
-                        Container[-1][4]=Container[-1][4]+1
-                    else:
-                        Container.append([Cur_Chr,Cur_Start,Cur_End,Cur_CellBC,Cur_PCR])
-                        CellBC=Cur_CellBC
-                        Chr=Cur_Chr
-                        Start=Cur_Start
-                        End=Cur_End
-                        PCR=1
-                else:
-                    if(len(Container)>Cutoff):
-                        if not CellBC=="NA":
-                            for fragment in Container:
-                                f_cut_file.write("\t".join([str(i) for i in fragment])+"\n")
-                    CellBC=Cur_CellBC
-                    Container=[[Cur_Chr,Cur_Start,Cur_End,Cur_CellBC,Cur_PCR]]
+    def write_cell(container, cell_bc, handle):
+        if cell_bc != "NA" and len(container) > Cutoff:
+            for fragment in container:
+                handle.write("\t".join([str(i) for i in fragment]) + "\n")
 
+    with open(bed_filename) as f, open(out_filename, "w") as f_cut_file:
+        first = f.readline().strip().split()
+        if not first:
+            return
 
+        cell_bc, chrom, start, end = first[:4]
+        container = [[chrom, start, end, cell_bc, 1]]
+
+        for line in f:
+            cur_cell_bc, cur_chrom, cur_start, cur_end = line.strip().split()[:4]
+            if cur_cell_bc != cell_bc:
+                write_cell(container, cell_bc, f_cut_file)
+                cell_bc, chrom, start, end = cur_cell_bc, cur_chrom, cur_start, cur_end
+                container = [[cur_chrom, cur_start, cur_end, cur_cell_bc, 1]]
+                continue
+
+            if cur_chrom == chrom and cur_start == start and cur_end == end:
+                container[-1][4] += 1
+            else:
+                chrom, start, end = cur_chrom, cur_start, cur_end
+                container.append([cur_chrom, cur_start, cur_end, cur_cell_bc, 1])
+
+        write_cell(container, cell_bc, f_cut_file)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process a BED file based on unique fragment number cutoff for each cell.')
     parser.add_argument('bed_filename', type=str, help='Input BED filename')
