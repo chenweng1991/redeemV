@@ -1,10 +1,6 @@
-.libPaths(c('/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal',"/home/cweng/R/x86_64-pc-linux-gnu-library/4.1-focal"))
-# .libPaths(c("/home/cweng/R/x86_64-pc-linux-gnu-library/4.1-focal","/nfs/apps/lib/R/4.1-focal/site-library.2021q2","/opt/R/4.1.0/lib/R/library","/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal"))
 library(Rcpp)
 library(Matrix)
 library(ape)
-library(phangorn) #,lib='/home/cweng/R/x86_64-pc-linux-gnu-library/4.1-focal'
-# library(Signac,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
 args = commandArgs(trailingOnly=TRUE)
 #print(c("Available distance methods:",c("Jaccard","Dice","Simpson","Kulczynski2","Ochiai","Hamming")))
 if(length(args)<5){

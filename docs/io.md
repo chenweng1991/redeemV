@@ -37,7 +37,7 @@ These are RNA barcodes. The workflow converts them to ATAC barcodes with `MyMult
 `GENOME_PREFIX` in `project.env` must point to a Bowtie2 genome index prefix for the mitochondrial-mask genome, for example:
 
 ```text
-/lab/solexa_weissman/cweng/Genomes/GRCH38/GRCH38_Bowtie2_MitoMask/hg38.mitoMask
+/path/to/genomes/hg38.mitoMask
 ```
 
 The prefix is passed to `bowtie2 -x` by `MyMultiome/MultiomeATAC_mito.sh`.

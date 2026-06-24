@@ -1,6 +1,6 @@
 #! /bin/bash
 name=$1
-Genome=/lab/solexa_weissman/cweng/Genomes/GRCH38
+Genome=${GENOME_DIR:-/path/to/GRCH38}
 ##################################################### Make aggregate track
 bedtools genomecov -bg -i $name -g  $Genome/hg38.chrom.sizes > ${name/.bed/.bg}
 bedGraphToBigWig ${name/.bed/.bg} $Genome/hg38.chrom.sizes ${name/.bed/.bw}

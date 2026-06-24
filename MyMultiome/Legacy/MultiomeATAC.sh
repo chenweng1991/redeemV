@@ -6,15 +6,15 @@ Read2=$3
 ReadBarcode=$4
 Cut=$5 # Minimum uniq fragment per cell to be considered
 CORE=$6
-MyMultiome=/lab/solexa_weissman/cweng/Packages/MyMultiome
-lib=/lab/solexa_weissman/cweng/Packages/cxw486/scATAClib/
+MyMultiome=${MYMULTIOME:-/path/to/MyMultiome}
+lib=${SCATACLIB:-/path/to/scATAClib}
 
 
 ##Step 1 trim adaptor (Important)
 cutadapt --cores=$CORE -a CTGTCTCTTATA -A CTGTCTCTTATA -o ${Read1/fastq.gz/trim.fastq.gz} -p ${Read2/fastq.gz/trim.fastq.gz} $Read1 $Read2
 
 ##Step2 Mapping
-bowtie2Index=/lab/solexa_weissman/cweng/Genomes/GRCH38/GRCH38_Bowtie2_MitoMask/hg38.mitoMask
+bowtie2Index=${GENOME_PREFIX:-/path/to/hg38.mitoMask}
 bowtie2 -X 1200  --very-sensitive -p $CORE -x $bowtie2Index -1 ${Read1/fastq.gz/trim.fastq.gz}  -2 ${Read2/fastq.gz/trim.fastq.gz} | samtools view -@ $CORE -bS - > $name.tmp.bam
 samtools sort -@ $CORE $name.tmp.bam > $name.bam
 samtools index -@ $CORE $name.bam

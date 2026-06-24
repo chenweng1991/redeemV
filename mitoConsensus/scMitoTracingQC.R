@@ -1,4 +1,3 @@
-.libPaths(c("/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Donor4Donor9/renv/library/R-4.1/x86_64-pc-linux-gnu",.libPaths()))
 library(scMitoTracing)
 library(ggplot2)
 library(dplyr)
@@ -7,7 +6,6 @@ library(gridExtra)
 args = commandArgs(trailingOnly=TRUE)
 WD<-paste(args[1],"/final",sep="")
 #WD<-paste(getwd(),"/DN4_mitoV/final",sep="")
-#args[1] ## mitoV/final, eg WD<-"/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Donor4Donor9/Donor4/DN4_BMMC/MTenrichCombine/mitoV/final"
 
 
 

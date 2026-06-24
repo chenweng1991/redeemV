@@ -1,6 +1,5 @@
 #!/bin/bash
 echo "This is not excutable, but to find a good exampl, go to"
-echo "/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/CoverageAnalysis/DN1_BMMC2_multikit"
 
 die()
 ## Note:  this should be run in a filder that has already run the MultiomeATAC_mito_Miseq.sh or
@@ -9,8 +8,8 @@ name=$1
 DownSampleFrac=(0.1 0.2 0.3) ## As an example it can be like this  (0.1 0.2 0.3)
 ReadBarcode=$4
 Cut=$5 # Minimum uniq fragment per cell to be considered
-MyMultiome=/lab/solexa_weissman/cweng/Packages/MyMultiome
-lib=/lab/solexa_weissman/cweng/Packages/cxw486/scATAClib/
+MyMultiome=${MYMULTIOME:-/path/to/MyMultiome}
+lib=${SCATACLIB:-/path/to/scATAClib}
 
 
 

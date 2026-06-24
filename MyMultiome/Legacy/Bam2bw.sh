@@ -1,9 +1,9 @@
 #! /bin/bash
-picard=/lab/solexa_weissman/cweng/Packages/Picard/picard.jar
-dropseq=/lab/solexa_weissman/cweng/Packages/cxw486/Drop-seq_tools-1.0
+picard=${PICARD_JAR:-/path/to/picard.jar}
+dropseq=${DROPSEQ_TOOLS:-/path/to/Drop-seq_tools}
 name=$1
-scATAClib=/lab/solexa_weissman/cweng/Packages/cxw486/scATAClib
-Genome=/lab/solexa_weissman/cweng/Genomes/GRCH38
+scATAClib=${SCATACLIB:-/path/to/scATAClib}
+Genome=${GENOME_DIR:-/path/to/GRCH38}
 ##################################################### Make aggregate track
 java -jar -Xmx4g $picard MarkDuplicates   -I $name.bam -O $name.dupMark.bam -M $name.matrix -REMOVE_DUPLICATES true
 samtools sort -n $name.dupMark.bam |samtools view -bf 2  | bedtools bamtobed -bedpe -i stdin | awk -v OFS='\t' '{print $1,$2,$6,".",1,$9}' |sort -k1,1 -k2,2n -k3,3n>$name.monoclonal.bed

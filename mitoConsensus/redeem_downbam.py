@@ -4,10 +4,6 @@ import random
 import os
 from collections import defaultdict
 
-os.getcwd()
-bam_file = "/lab/solexa_weissman/cweng/Packages/REDEEM-V/example_data/barcoded_bams/barcodes.10.bam"
-barcode_tag='BC'
-fraction=0.5
 def build_dictionaries(
     bam_file, 
     barcode_tag="BC"
@@ -162,4 +158,4 @@ if __name__ == "__main__":
     )
     
 print(out_bam)
-directory = '/lab/solexa_weissman/cweng/Packages/REDEEM-V/example_data/test/'
+directory = './'

@@ -1,26 +1,5 @@
-# .libPaths(c('/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal',.libPaths()))
-# library(Rcpp,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(dplyr,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(Matrix,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(Matrix.utils,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(ggplot2,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(MASS,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(gridExtra,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(Matrix.utils,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(BuenColors,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(EZsinglecell,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(reshape2,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(ape,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(treeio,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(ggtree,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(ggnewscale,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(ggtreeExtra,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(phangorn,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-# library(gsubfn,lib="/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal")
-l<-'/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal'
-.libPaths(c(.libPaths(),'/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal'))
-library(Rcpp,lib=l)
-library(fastmatch,lib=l)
+library(Rcpp)
+library(fastmatch)
 library(TreeTools)
 library(dplyr)
 library(Matrix)
@@ -41,10 +20,10 @@ library(ggExtra)
 library(phangorn)
 library(gsubfn)
 ##Prepare Mito sequence context
-mitoref<-read.table("/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210706L2/COMBINE_CALLV/CW_mgatk_test/final/chrM_refAllele.txt")
+REDEEM_V <- Sys.getenv("REDEEM_V", unset = ".")
+mitoref<-read.table(file.path(REDEEM_V, "source", "chrM_refAllele.txt"))
 mitobasebias<-table(toupper(mitoref$V2)) %>% as.data.frame()
 # Important! Make Context dictionary
-# library("insect",lib="/home/cweng/R/x86_64-pc-linux-gnu-library/4.1-focal")
 library(stringi)
 
 rc<-function(input){
@@ -255,7 +234,7 @@ reverse_complement <- function(s){
 }
 
 # Process 3 digit signature based on letters
-ref_all <- fread("/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/Run210706L2/COMBINE_CALLV/CW_mgatk_test/final/chrM_refAllele.txt")
+ref_all <- fread(file.path(REDEEM_V, "source", "chrM_refAllele.txt"))
 colnames(ref_all) <- c("pos", "ref")
 ref_all$ref <- toupper(ref_all$ref)
 l <- as.character(ref_all$ref)
@@ -363,8 +342,8 @@ Cell_Variant.seurat <- FindClusters(Cell_Variant.seurat, resolution = res)
 }
 
 Translate_RNA2ATAC<-function(meta=bmmc.filtered@meta.data,celltepe="CellType",RNAclusterPost="-1"){
-ATACWhite<-read.table("/lab/solexa_weissman/cweng/Genomes/10X/WhiteList_10X_Multiome.ATAC")
-RNAWhite<-read.table("/lab/solexa_weissman/cweng/Genomes/10X/WhiteList_10X_Multiome.RNA")
+ATACWhite<-read.table(file.path(REDEEM_V, "source", "WhiteList_10X_Multiome.ATAC"))
+RNAWhite<-read.table(file.path(REDEEM_V, "source", "WhiteList_10X_Multiome.RNA"))
 Dic2<-ATACWhite$V1
 names(Dic2)<-as.character(RNAWhite$V1)
 meta$ATACName<-Dic2[gsub(RNAclusterPost,"",row.names(meta))]

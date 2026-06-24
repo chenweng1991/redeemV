@@ -1,7 +1,5 @@
-l<-'/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal'
-.libPaths(c(.libPaths(),'/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal'))
-library(Rcpp,lib=l)
-library(fastmatch,lib=l)
+library(Rcpp)
+library(fastmatch)
 library(TreeTools)
 library(dplyr)
 library(ggplot2)
@@ -12,14 +10,13 @@ library(EnsDb.Hsapiens.v86)
 library(dplyr)
 
 
-#' Wrap Seurat RNA clustering 
+#' Wrap Seurat RNA clustering
 #'
-#' This function allows you to 
-#' @param mtx sparse Matrix of class "dgCMatrix", each row is a gene, each column is a cell, 
+#' This function allows you to
+#' @param mtx sparse Matrix of class "dgCMatrix", each row is a gene, each column is a cell,
 #' @param exp The name of this sample/experiment
 #' @export ob Standard Seurat object
 #' @examples
-#' bmmc.data=Read10X(data.dir = "/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Donor01_BMMC_1/CellRanger/Donor01_BMMC_1/outs/filtered_feature_bc_matrix")
 #' docluster_GEM(mtx=bmmc.data$`Gene Expression`,exp="DN1_BMMC1")
 docluster_GEM<-function(mtx=bmmc.data$`Gene Expression`,exp="DN1_BMMC1"){
 require(Seurat)
@@ -35,7 +32,7 @@ ob <- RunUMAP(ob, dims = 1:10)
 return(ob)
 }
 
-#' 
+#'
 #'
 #' This function allows you to express your love of cats.
 #' @param love Do you love cats? Defaults to TRUE.
@@ -43,7 +40,7 @@ return(ob)
 #' @export
 #' @examples
 #' cat_function()
-MultiWrapper<-function(path="/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Donor01_CD34_1_Multiomekit/CellRanger/Donor01_CD34_1/outs"){
+MultiWrapper<-function(path="."){
 library(Seurat)
 library(Signac)
 library(EnsDb.Hsapiens.v86)
@@ -63,10 +60,10 @@ atac_counts <- atac_counts[as.vector(grange.use), ]
 rna_counts.filtered<-rna_counts[,CellID]
 atac_counts.filtered<-atac_counts[,CellID]
 # Use RNA to create the default object
-ob<-CreateSeuratObject(counts = rna_counts.filtered)    
+ob<-CreateSeuratObject(counts = rna_counts.filtered)
 # Create chrome_assay
 annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86)
-seqlevelsStyle(annotations)<-"UCSC" 
+seqlevelsStyle(annotations)<-"UCSC"
 genome(annotations) <- "hg38"
 frag.file <- paste(path,"/atac_fragments.tsv.gz",sep="")
 chrom_assay <- CreateChromatinAssay(
@@ -77,7 +74,7 @@ chrom_assay <- CreateChromatinAssay(
    min.cells = 10,
    annotation = annotations
 )
-# Add chrom_assay 
+# Add chrom_assay
 ob[["ATAC"]]<-chrom_assay
 ## Further filter the object
 ob <- subset(
@@ -99,6 +96,6 @@ ob <- RunSVD(ob)
 ob <- RunUMAP(ob, reduction = 'lsi', dims = 2:50, reduction.name = "umap.atac", reduction.key = "atacUMAP_")
 ob <- FindMultiModalNeighbors(ob, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
 ob <- RunUMAP(ob, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
-ob <- FindClusters(ob, graph.name = "wsnn", algorithm = 3, verbose = FALSE) 
+ob <- FindClusters(ob, graph.name = "wsnn", algorithm = 3, verbose = FALSE)
 return(list(seurat=ob,metric=per_barcode_metrics))
-}    
+}

@@ -1,0 +1,2 @@
+sample	r1	r2_barcode	r3	cellranger_barcodes
+SAMPLE_A	/path/to/SAMPLE_A_R1.fastq.gz	/path/to/SAMPLE_A_barcode.fastq.gz	/path/to/SAMPLE_A_R3.fastq.gz	/path/to/cellranger/SAMPLE_A/filtered_feature_bc_matrix/barcodes.tsv.gz

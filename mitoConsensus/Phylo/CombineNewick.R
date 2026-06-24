@@ -1,4 +1,3 @@
-.libPaths(c('/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal',"/home/cweng/R/x86_64-pc-linux-gnu-library/4.1-focal"))
 library(Rcpp)
 library(Matrix)
 library(ape)
@@ -9,7 +8,6 @@ N=args[2]
 prefix=args[3]
 print("Input: (1)bootstrap folder    (2)The number of trees to combine    (3) prefix(Combine.XXXX is suggested)")
 
-#path<-"/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/PhylogeneticTree/TreeBenchmarking/DN1_CD34_BMMC/jaccard.nj.boots/"
 all.nws<-list.files(path)[grep("Boot.",list.files(path))]
 print(length(all.nws))
 

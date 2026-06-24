@@ -1,5 +1,4 @@
 #!/usr/bin/env Rscript
-.libPaths(c('/lab/solexa_weissman/cweng/Packages/R/x86_64-pc-linux-gnu-library/4.1-focal',.libPaths()))
 library(labeling)
 library(ggplot2)
 library(dplyr)

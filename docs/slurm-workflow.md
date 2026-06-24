@@ -1,13 +1,13 @@
 # Shared Slurm Workflow
 
-This document describes the current maintained way to run REDEEM-V for multi-sample projects on the Weissman lab cluster.
+This document describes the current maintained way to run REDEEM-V for multi-sample projects on a Slurm cluster.
 
 ## Locations
 
 ```text
-Workflow root: /lab/solexa_weissman/cweng/workflows/redeemV
-Submitter:     /lab/solexa_weissman/cweng/workflows/redeemV/scripts/submit_redeemV_project.sh
-Package:       /lab/solexa_weissman/cweng/Packages/REDEEM-V
+Workflow root: workflow
+Submitter:     workflow/scripts/submit_redeemV_project.sh
+Package:       /path/to/REDEEM-V
 ```
 
 Project-specific files, logs, and outputs should stay in the project directory. Do not copy and edit the shared workflow scripts for each project.
@@ -27,9 +27,9 @@ Create the config files from the shared templates:
 
 ```bash
 mkdir -p PROJECT/Analysis_redeemV
-cp /lab/solexa_weissman/cweng/workflows/redeemV/config/example.project.env \
+cp workflow/config/example.project.env \
   PROJECT/Analysis_redeemV/project.env
-cp /lab/solexa_weissman/cweng/workflows/redeemV/templates/sample_sheet.tsv \
+cp workflow/templates/sample_sheet.tsv \
   PROJECT/Analysis_redeemV/samples.tsv
 ```
 
@@ -94,7 +94,7 @@ Before submitting jobs, confirm that:
 Always dry-run before submission:
 
 ```bash
-DRY_RUN=1 /lab/solexa_weissman/cweng/workflows/redeemV/scripts/submit_redeemV_project.sh \
+DRY_RUN=1 workflow/scripts/submit_redeemV_project.sh \
   PROJECT/Analysis_redeemV/project.env \
   PROJECT/Analysis_redeemV/samples.tsv
 ```
@@ -106,7 +106,7 @@ The dry run prints the `sbatch` commands and validates required input files with
 Submit all samples:
 
 ```bash
-/lab/solexa_weissman/cweng/workflows/redeemV/scripts/submit_redeemV_project.sh \
+workflow/scripts/submit_redeemV_project.sh \
   PROJECT/Analysis_redeemV/project.env \
   PROJECT/Analysis_redeemV/samples.tsv
 ```
@@ -114,7 +114,7 @@ Submit all samples:
 Submit selected samples:
 
 ```bash
-/lab/solexa_weissman/cweng/workflows/redeemV/scripts/submit_redeemV_project.sh \
+workflow/scripts/submit_redeemV_project.sh \
   PROJECT/Analysis_redeemV/project.env \
   PROJECT/Analysis_redeemV/samples.tsv \
   SAMPLE_A SAMPLE_B

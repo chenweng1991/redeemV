@@ -7,6 +7,7 @@ import pysam
 import sys
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 HashDic_file=sys.argv[1]
 Hashcall_file=sys.argv[2]
@@ -23,9 +24,10 @@ for line in f:
     HashDic[L[0]]=L[1]
 f.close()
 
-## Make a dictionary to convert from RNA names to ATAC names(Not in use in this script, but leave it here for other cases)
-ATACWhite=pd.read_table("/lab/solexa_weissman/cweng/Genomes/10X/WhiteList_10X_Multiome.ATAC",names=["ATACName"])
-RNAWhite=pd.read_table("/lab/solexa_weissman/cweng/Genomes/10X/WhiteList_10X_Multiome.RNA",names=["RNAName"])
+## Make a dictionary to convert from RNA names to ATAC names.
+REDEEM_V = Path(__file__).resolve().parents[2]
+ATACWhite=pd.read_table(REDEEM_V / "source" / "WhiteList_10X_Multiome.ATAC", names=["ATACName"])
+RNAWhite=pd.read_table(REDEEM_V / "source" / "WhiteList_10X_Multiome.RNA", names=["RNAName"])
 RNAWhite["ATAC_Name"]=ATACWhite.ATACName
 RNA2ATACDic=RNAWhite.set_index("RNAName")["ATAC_Name"].to_dict()
 # ATAC2RNADic=RNAWhite.set_index("ATAC_Name")["RNA_Name"].to_dict()
@@ -42,8 +44,6 @@ Hashcall_sig.ATACName=Hashcall_sig.ATACName+"-1"
 
 
 # Define Bam files
-# BamInput="/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Donor04_BMMC1_ConditionTest/CellRanger/Donor04_BMMC1_GDN/outs/atac_possorted_bam.bam"
-BamInput="/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/Donor04_BMMC1_ConditionTest/CellRanger/Donor04_BMMC1_GDN/outs/gex_possorted_bam.bam"
 
 out_handles_Dic={}
 TPLT= pysam.AlignmentFile(BamInput, "rb")

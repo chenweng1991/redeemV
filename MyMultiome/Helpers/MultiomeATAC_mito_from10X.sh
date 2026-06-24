@@ -4,8 +4,8 @@ bam=$1
 CORE=24
 # dic=$2
 #Cut=0 # Minimum uniq fragment per cell to be considered
-MyMultiome=/lab/solexa_weissman/cweng/Packages/MyMultiome
-lib=/lab/solexa_weissman/cweng/Packages/cxw486/scATAClib/
+MyMultiome=${MYMULTIOME:-/path/to/MyMultiome}
+lib=${SCATACLIB:-/path/to/scATAClib}
 
 # Step 1 extract dic table
 #samtools view -bS $bam chrM > ${bam/.bam/.mito.bam}

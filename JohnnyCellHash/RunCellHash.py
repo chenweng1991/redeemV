@@ -18,7 +18,6 @@ libmulti = Name
 fq1=args[3]
 fq2=args[4]
 
-#fqpath="/lab/solexa_weissman/cweng/Projects/MitoTracing_Velocity/SecondaryAnalysis/ConditionTest2_Donor04_BMMC2/FASTQ/Hash/"
 ####define files
 R1 = cwd+"/"+fq1
 R2 = cwd+"/"+fq2

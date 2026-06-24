@@ -27,7 +27,7 @@ The sample sheet maps the bundled example files as:
 From the repository root:
 
 ```bash
-DRY_RUN=1 /lab/solexa_weissman/cweng/workflows/redeemV/scripts/submit_redeemV_project.sh \
+DRY_RUN=1 workflow/scripts/submit_redeemV_project.sh \
   examples/quickstart/Analysis_redeemV/project.env \
   examples/quickstart/Analysis_redeemV/samples.tsv
 ```
@@ -39,7 +39,7 @@ The dry run validates that the FASTQs and barcode file exist and prints the Slur
 After the dry run succeeds, submit the quickstart sample with:
 
 ```bash
-/lab/solexa_weissman/cweng/workflows/redeemV/scripts/submit_redeemV_project.sh \
+workflow/scripts/submit_redeemV_project.sh \
   examples/quickstart/Analysis_redeemV/project.env \
   examples/quickstart/Analysis_redeemV/samples.tsv
 ```

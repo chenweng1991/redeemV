@@ -277,7 +277,6 @@ def run_mito_consensus(prefix, work_dir, BaseQ_thld_hi=30):
 
 
 
-# work_dir="/lab/solexa_weissman/cweng/Projects/Collaborator/Roman_NK/Data_220907_Pilot3/REDEEM-V/source/Test/Out_mitoConsensus/"
 # num_cores=12
 
 if __name__=="__main__":

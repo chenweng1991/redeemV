@@ -1,13 +1,13 @@
 #!/bin/bash
 ## Note:  this version is for miseq or novaseq,  nextseq is slightly different
 name=$1
-MyMultiome=/lab/solexa_weissman/cweng/Packages/MyMultiome
-lib=/lab/solexa_weissman/cweng/Packages/cxw486/scATAClib/
+MyMultiome=${MYMULTIOME:-/path/to/MyMultiome}
+lib=${SCATACLIB:-/path/to/scATAClib}
 
 
 
 ##Step2 Mapping
-bowtie2Index=/lab/solexa_weissman/cweng/Genomes/GRCH38/GRCH38_Bowtie2_MitoMask/hg38.mitoMask
+bowtie2Index=${GENOME_PREFIX:-/path/to/hg38.mitoMask}
 bowtie2 -X 1200  --very-sensitive -p 6 -x $bowtie2Index -1 $name"_"R1_001.fastq.gz -2 $name"_"R2_001.fastq.gz  |  samtools view -u -  |  samtools sort -  >$name.bam
 samtools index $name.bam
 

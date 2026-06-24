@@ -2,8 +2,8 @@
 ## Note:  this version is for miseq or novaseq,  nextseq is slightly different
 name=$1
 Cut=$2 # Minimum uniq fragment per cell to be considered
-MyMultiome=/lab/solexa_weissman/cweng/Packages/MyMultiome
-lib=/lab/solexa_weissman/cweng/Packages/cxw486/scATAClib/
+MyMultiome=${MYMULTIOME:-/path/to/MyMultiome}
+lib=${SCATACLIB:-/path/to/scATAClib}
 
 
 ##Step11 ReadsCount

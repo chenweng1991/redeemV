@@ -5,9 +5,8 @@ It count the uniq reads on each chromosome for each cell and out put a long matr
 
 Note, to prepare the monoclonal bed-like files, simply do bash "cat atac_fragments.tsv.gz | grep -v '^#' | sort -k1,1 -k4,4 > atac_fragments.tsv.sorted "
 
-Example: 
-path=/lab/solexa_weissman/cweng/Packages/MyMultiome/Helpers/
-python $path/Summarize.chr.py atac_fragments.tsv.sorted filtered_feature_bc_matrix/barcodes.tsv.gz > atac_chr_summarise
+Example:
+pythonSummarize.chr.py atac_fragments.tsv.sorted filtered_feature_bc_matrix/barcodes.tsv.gz > atac_chr_summarise
 
 '''
 
@@ -47,7 +46,7 @@ with open(Monoclonal) as f:
             if chr==Group_chr and Cell==Group_Cell:
                 Count=Count+1
             else:
-                if Group_Cell in ValidCellTupple:                    
+                if Group_Cell in ValidCellTupple:
                     print(Group_Cell+"\t"+Group_chr+"\t"+str(Count)+"\t")
                 Count=1
                 Group_chr=LineArray[0]

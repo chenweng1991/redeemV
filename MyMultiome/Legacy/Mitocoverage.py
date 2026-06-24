@@ -24,7 +24,7 @@ for line in f:
         fnameout=open("tmp.name.bed","w")
         fnameout.writelines("%s\n" % l for l in CellBCs)
         fnameout.close()
-        os.system("bedtools coverage -a /lab/solexa_weissman/cweng/Genomes/mitoGenome.bed -b tmp.bed -d | cut -f4,5 | paste - tmp.name.bed  >>"+out)
+        os.system("bedtools coverage -a ${MITO_GENOME_BED:-/path/to/mitoGenome.bed} -b tmp.bed -d | cut -f4,5 | paste - tmp.name.bed  >>"+out)
         CellBC=Cur_CellBC
         SingleCellBed=[]
         SingleCellBed.append("\t".join(lineAy[0:3]))

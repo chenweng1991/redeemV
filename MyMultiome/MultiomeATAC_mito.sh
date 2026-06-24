@@ -89,7 +89,7 @@ else
 fi
 
 ##Step3 Mapping Sorting and Indexing
-#bowtie2Index=/lab/solexa_weissman/cweng/Genomes/GRCH38/GRCH38_Bowtie2_MitoMask/hg38.mitoMask
+#bowtie2Index=${GENOME_PREFIX:-/path/to/hg38.mitoMask}
 if [ ! -f "$name.bam" ]; then
   echo "Running step3 Mapping Sorting and Indexing..."
   bowtie2 -X 1200  --very-sensitive -p $CORE -x $bowtie2Index -1 $Read1.trim.BC  -2 $Read2.trim.BC | samtools view -@ $CORE -bS - > $name.tmp.bam

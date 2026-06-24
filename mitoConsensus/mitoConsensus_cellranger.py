@@ -34,7 +34,6 @@ This is updated version that prevent from calling mutations that are on end with
 Specifically, no mutation calling in regions forward reference start > reverse reference start
               no mutation calling in regions forward reference end > reverse reference start
 Changes in Section 3              
-Exploratory analysis here /lab/solexa_weissman/cweng/Projects/Collaborator/Caleb/Review_consensus.ipynb
 '''
 if len(sys.argv)<5:
     print("Argument missing")

@@ -2,13 +2,7 @@
 
 REDEEM-V is the mitochondrial variant-calling component of the REDEEM framework. It starts from multiome mitochondrial FASTQs plus Cell Ranger ARC cell barcodes and produces per-cell mitochondrial coverage and consensus genotype tables for downstream lineage tracing with [REDEEM-R](https://github.com/chenweng1991/REDEEM-R).
 
-This repository contains the core mapping, barcode handling, QC, and consensus calling code. On the Weissman lab cluster, the recommended production entry point is the shared Slurm workflow:
-
-```text
-/lab/solexa_weissman/cweng/workflows/redeemV
-```
-
-The workflow wraps this package into one dependency chain per sample:
+This repository contains the core mapping, barcode handling, QC, and consensus calling code. The recommended production entry point is the project workflow template included in this repository. It wraps this package into one dependency chain per sample:
 
 ```text
 map/QC -> preprocess -> consensus array -> finalize
@@ -25,14 +19,14 @@ conda env create -f environment.yml
 conda activate redeemv
 ```
 
-On the Weissman lab cluster, production runs usually use the shared conda environment configured in `project.env`. The `environment.yml` file documents the package requirements for reproducible development and local testing.
+For cluster production runs, configure the conda environment path and scheduler settings in `project.env`. The `environment.yml` file documents the package requirements for reproducible development and local testing.
 
 ## Quickstart
 
 A small workflow-style example is available in [examples/quickstart](examples/quickstart). From the repository root, validate the bundled example data with:
 
 ```bash
-DRY_RUN=1 /lab/solexa_weissman/cweng/workflows/redeemV/scripts/submit_redeemV_project.sh \
+DRY_RUN=1 workflow/scripts/submit_redeemV_project.sh \
   examples/quickstart/Analysis_redeemV/project.env \
   examples/quickstart/Analysis_redeemV/samples.tsv
 ```
@@ -56,9 +50,9 @@ Start from the maintained templates:
 
 ```bash
 mkdir -p PROJECT/Analysis_redeemV
-cp /lab/solexa_weissman/cweng/workflows/redeemV/config/example.project.env \
+cp workflow/config/example.project.env \
   PROJECT/Analysis_redeemV/project.env
-cp /lab/solexa_weissman/cweng/workflows/redeemV/templates/sample_sheet.tsv \
+cp workflow/templates/sample_sheet.tsv \
   PROJECT/Analysis_redeemV/samples.tsv
 ```
 
@@ -82,7 +76,7 @@ Illumina `I1` FASTQs are not used by this REDEEM-V workflow.
 Always dry-run first:
 
 ```bash
-DRY_RUN=1 /lab/solexa_weissman/cweng/workflows/redeemV/scripts/submit_redeemV_project.sh \
+DRY_RUN=1 workflow/scripts/submit_redeemV_project.sh \
   PROJECT/Analysis_redeemV/project.env \
   PROJECT/Analysis_redeemV/samples.tsv
 ```
@@ -90,7 +84,7 @@ DRY_RUN=1 /lab/solexa_weissman/cweng/workflows/redeemV/scripts/submit_redeemV_pr
 Submit all samples after validation:
 
 ```bash
-/lab/solexa_weissman/cweng/workflows/redeemV/scripts/submit_redeemV_project.sh \
+workflow/scripts/submit_redeemV_project.sh \
   PROJECT/Analysis_redeemV/project.env \
   PROJECT/Analysis_redeemV/samples.tsv
 ```
@@ -98,7 +92,7 @@ Submit all samples after validation:
 Submit selected samples by appending sample names:
 
 ```bash
-/lab/solexa_weissman/cweng/workflows/redeemV/scripts/submit_redeemV_project.sh \
+workflow/scripts/submit_redeemV_project.sh \
   PROJECT/Analysis_redeemV/project.env \
   PROJECT/Analysis_redeemV/samples.tsv \
   SAMPLE1 SAMPLE2
