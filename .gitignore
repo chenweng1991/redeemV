@@ -1,1 +1,36 @@
+# Project-local scratch data
 source/Test/
+
+# Python bytecode, archive metadata, and local caches
+__MACOSX/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# R session and build artifacts
+.Rhistory
+.RData
+.Rproj.user/
+
+# REDEEM-V generated analysis outputs
+Analysis_redeemV/*/Log/
+Analysis_redeemV/*/Out_mitoConsensus/
+Analysis_redeemV/*/*.bam
+Analysis_redeemV/*/*.bam.bai
+Analysis_redeemV/*/*.tmp.bam
+Analysis_redeemV/*/*.trim
+Analysis_redeemV/*/*.trim.BC
+Analysis_redeemV/*/*.ReadsCounts
+Analysis_redeemV/*/*.QCplot.png
+Analysis_redeemV/*/*.uniqmapped.*
+
+# Cluster and command logs
+*.out
+*.err
+*.log
+slurm-*.out
+
+# Quickstart generated outputs
+examples/quickstart/Analysis_redeemV/*/

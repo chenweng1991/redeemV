@@ -1,0 +1,39 @@
+name: redeemv
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # Core command-line tools
+  - python=3.10
+  - bowtie2
+  - cutadapt
+  - samtools
+  - bedtools
+  - fastqc
+  - multiqc
+
+  # Python runtime used by MyMultiome, mitoConsensus, and CellHash helpers
+  - biopython
+  - click
+  - matplotlib
+  - numpy
+  - pandas
+  - progress
+  - pysam
+  - scikit-learn
+  - scipy
+  - seaborn
+  - tqdm
+
+  # R runtime used by QC and strand-bias filtering scripts
+  - r-base
+  - r-dplyr
+  - r-ggplot2
+  - r-gridextra
+  - r-labeling
+  - r-plyr
+  - bioconductor-qvalue
+
+  # General utilities
+  - pip

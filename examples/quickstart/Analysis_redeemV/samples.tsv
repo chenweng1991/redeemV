@@ -1,0 +1,2 @@
+sample	r1	r2_barcode	r3	cellranger_barcodes
+quickstart	/lab/solexa_weissman/cweng/Packages/REDEEM-V/source/Example.R1.fq.gz	/lab/solexa_weissman/cweng/Packages/REDEEM-V/source/Example.i5.fq.gz	/lab/solexa_weissman/cweng/Packages/REDEEM-V/source/Example.R2.fq.gz	/lab/solexa_weissman/cweng/Packages/REDEEM-V/source/barcodes.tsv.gz
